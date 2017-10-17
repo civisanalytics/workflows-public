@@ -1,0 +1,61 @@
+# This example workflow has one of each job type, demonstraing how to use
+# mistral to run some jobs on platfrom with "this-then-that" dependencies.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/latest/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+
+quickstart:  # the name of the workflow can be anything, but Platform ignores it
+  tasks:  # all tasks for the workflow go here
+
+    # Run a python script by specifying a the python3_script action.
+    # The inputs are any inputs to the /scripts/python3 API endpoint
+    python:
+      action: civis.python3_script
+      input:
+        name: python is the best
+        source: print("Hello from Python!")
+      # This key indicates which task(s) to run after this task succeeds.
+      # There are many possible options. See the mistral docs for details.
+      on-success:
+        - r
+
+    # This is a task for an R script again with the possible inputs
+    # determined by the /scripts/r API endpoint.
+    r:
+      action: civis.r_script
+      input:
+        name: R is the best
+        source: print("Hello from R!")
+      on-success:
+        - container  # the name of the next task goes here. you can launch
+                     # more than one by adding to the list.
+
+    # If you need more flexibility, you can run a container script task.
+    # Again the possible inputs are determined by the /scripts/scontainers
+    # API endpoint.
+    container:
+      action: civis.container_script
+      input:
+        name: containers forever
+        docker_image_name: civisanalytics/datascience-python
+        required_resources:
+          cpu: 1024
+          memory: 1024
+          disk_space: 1.0
+        docker_command: echo 'Hello from a container!'
+
+    # This task runs an arbitrary Platform job with a known ID.
+    # It is commented out right now. Note that the tasks above generate a
+    # new job ID each time they are run.
+    # platform_job:
+    #   action: civis.run_job
+    #   input:
+    #     job_id: 389574093194329
