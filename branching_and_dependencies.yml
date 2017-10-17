@@ -1,0 +1,79 @@
+# This example workflow demonstrates how to use the "direct" workflow type
+# in Mistral to build up a chain of jobs with dependencies. If you run this
+# workflow, you should see an initial python job, and then three running in
+# parallel, and then a final python job after those three are done.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/latest/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+
+branching_and_dependencies:  # the name of the workflow can be anything, but Platform ignores it
+  tasks:  # all tasks for the workflow go here
+
+    python_init:
+      action: civis.python3_script
+      input:
+        name: python init
+        source: print("Hello from Python! We are just getting started!")
+      # This key indicates which tasks to run after this task succeeds.
+      # There are many possible options. See the mistral docs for details.
+      # Here we are listing all tasks to run in a list.
+      on-success:
+        - python_task_a
+        - python_task_b
+        - python_task_c
+
+    python_task_a:
+      action: civis.python3_script
+      input:
+        name: python task a
+        # some fancy YAML for multiline strings
+        source: |
+          import time
+
+          print("Python Task A greets you!", flush=True)
+          time.sleep(30)
+      # After this task finishes, it launches the final task.
+      on-success:
+        - python_final
+
+    python_task_b:
+      action: civis.python3_script
+      input:
+        name: python task b
+        source: |
+          import time
+
+          print("Python Task B greets you!", flush=True)
+          time.sleep(30)
+      on-success:
+        - python_final
+
+    python_task_c:
+      action: civis.python3_script
+      input:
+        name: python task c
+        source: |
+          import time
+
+          print("Python Task C greets you!", flush=True)
+          time.sleep(30)
+      on-success:
+        - python_final
+
+    python_final:
+      action: civis.python3_script
+      input:
+        name: python final
+        source: print("The final Python script greets you!")
+      # The join key tells Mistral that this task should wait for all tasks
+      # pointing to it (via the on-success keys above) before starting this
+      # task.
+      join: all
