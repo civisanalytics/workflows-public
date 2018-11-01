@@ -1,0 +1,37 @@
+# This example workflow demonstrates how to run the same task for each dictionary in a list.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  input:
+    # The collection referenced with YAQL should be under input
+    - things:
+      - foo: 1
+        bar: 2
+        spam: 3
+      - foo: 4
+        bar: 5
+        spam: 6
+      - foo: 7
+        bar: 8
+        spam: 9
+
+  tasks:
+    spam:
+      action: civis.scripts.python3
+      with-items: thing in <% $.things %>
+      input:
+        source: |
+          print(
+            'foo', <% $.thing.get('foo') %>,
+            'bar', <% $.thing.get('bar') %>,
+            'spam', <% $.thing.get('spam') %>
+          )

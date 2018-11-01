@@ -1,0 +1,27 @@
+# This example workflow demonstrates how to run SQL script tasks in a workflow.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  tasks:
+    sql_job:
+      action: civis.scripts.sql
+      input:
+        # Your Database credential id in platform
+        # https://platform.civisanalytics.com/credentials
+        credential_id: 0
+
+        # The remote host id of your database
+        # https://api.civisanalytics.com/databases
+        remote_host_id: 0
+
+        sql: |
+          SELECT 1

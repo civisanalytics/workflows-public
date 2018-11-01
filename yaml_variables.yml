@@ -1,0 +1,51 @@
+# This example workflow demonstrates how to define & refer to YAML variables in workflows.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  input:
+    # Before the value, prefix the variable name with &
+    - city_name: &city_name Seattle
+
+    # The variable name doesn't have to match the yaml name
+    - state: &default_state WA
+
+  # Variables can be multi-line using a pipe
+  # but not as part of the input block
+  source: &source |
+    import os
+    print(os.environ['CITY_NAME'], os.environ['STATE'])
+
+  tasks:
+    variable:
+      action: civis.scripts.python3
+      input:
+        params:
+          - name: 'CITY_NAME'
+            type: 'string'
+            # reference variables with *
+            default: *city_name
+          - name: 'STATE'
+            type: 'string'
+            default: *default_state
+        source: *source
+
+    variable_2:
+      action: civis.scripts.python3
+      input:
+        params:
+          - name: 'CITY_NAME'
+            type: 'string'
+            default: 'Washington'
+          - name: 'STATE'
+            type: 'string'
+            default: 'DC'
+        source: *source
