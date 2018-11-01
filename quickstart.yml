@@ -4,7 +4,7 @@
 # Workflows in the Civis Platform are written in YAML and a workflow DSL
 # (domain specific language) called Mistral.
 #
-# See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
 # for an introduction to YAML.
 #
 # See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
