@@ -1,5 +1,5 @@
-# This example workflow has one of each job type, demonstraing how to use
-# mistral to run some jobs on platfrom with "this-then-that" dependencies.
+# This example workflow has one of each job type, demonstrating how to use
+# mistral to run some jobs on platform with "this-then-that" dependencies.
 #
 # Workflows in the Civis Platform are written in YAML and a workflow DSL
 # (domain specific language) called Mistral.
@@ -7,7 +7,7 @@
 # See this website, http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics,
 # for an introduction to YAML.
 #
-# See the Mistral documentation, https://docs.openstack.org/mistral/latest/user/dsl_v2.html,
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
 # for a description of the Mistral DSL.
 
 version: '2.0'  # you always need this key to specify version 2 of the mistral DSL

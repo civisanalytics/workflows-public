@@ -18,5 +18,5 @@ You can find documentation for the technologies behind the Civis workflows in
 the following spots:
 
 - [YAML](http://docs.ansible.com/ansible/latest/YAMLSyntax.html#yaml-basics)
-- [Mistral v2 Workflow DSL](https://docs.openstack.org/mistral/latest/user/dsl_v2.html)
+- [Mistral v2 Workflow DSL](https://docs.openstack.org/mistral/pike/user/dsl_v2.html)
 - [YAQL](https://yaql.readthedocs.io/en/latest/)
