@@ -13,10 +13,10 @@ version: '2.0'  # you always need this key to specify version 2 of the mistral D
 workflow:
   # Find out your Database credential id in the credential page in platform
   # https://platform.civisanalytics.com/credentials
-  credential_id: &credential_id 1142
+  credential_id: &credential_id 0
   # The remote_host_id of your database
   # https://api.civisanalytics.com/databases
-  cluster_id: &cluster_id 32
+  cluster_id: &cluster_id 0
 
   # Define a block with variables
   # We can reference variables within other variable blocks
