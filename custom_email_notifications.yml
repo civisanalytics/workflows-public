@@ -1,0 +1,60 @@
+# This example workflow demonstrates how to use workflows to send custom
+# email notifications.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  tasks:
+    email_job_success:
+      action: civis.scripts.python3
+      input:
+        notifications:
+          successOn: true
+          successEmailAddresses:
+            - putyourownemail@address.here
+          successEmailBody: |
+            This is a custom success message using *MarkDown*
+          failureEmailAddresses:
+            - putyourownemail@address.here
+          failureOn: true
+        source: |
+          print('Hello world!')
+
+    email_job_failure:
+      action: civis.scripts.python3
+      input:
+        notifications:
+          failureOn: true
+          failureEmailAddresses:
+            - putyourownemail@address.here
+        source: |
+          raise ValueError('This job always fails!')
+
+    email_job_stalling:
+      action: civis.scripts.python3
+      input:
+        notifications:
+          successOn: true
+          successEmailAddresses:
+            - putyourownemail@address.here
+          successEmailBody: |
+            You'll never see this email
+          failureOn: true
+          failureEmailAddresses:
+            - putyourownemail@address.here
+          # After X minutes, email a warning that this job is still running
+          # Stall warnings are sent to the failure email addresses
+          stallWarningMinutes: 1
+        source: |
+          import time
+
+          time.sleep(120)
+          print("You should've received a stall warning by now")

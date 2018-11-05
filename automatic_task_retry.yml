@@ -1,0 +1,41 @@
+# This example workflow demonstrates how to automatically retry a task.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  tasks:
+    retry_this_job:
+      action: civis.scripts.python3
+      # This is specified for the task, not the input
+      retry:
+        # Number of attempts, not including the first one.
+        # A count of 1 means there are 2 attempts.
+        count: 1
+        # Delay between attempts in seconds
+        delay: 5
+      input:
+        # This code looks at the current workflow & execution
+        # to find out if it's running for the first time.
+        # If it is, it fails. The second time it'll successfully complete.
+        source: |
+          import os
+          import civis
+
+          client = civis.APIClient()
+          resp = client.workflows.get_executions(
+            <% $.get('__env').workflow_id %>,
+            <% $.get('__env').execution_id %>,
+          )
+
+          if len(resp.tasks[0].runs) <= 1:
+            raise ValueError('This job always fails the first time')
+
+          print('It worked this time!')

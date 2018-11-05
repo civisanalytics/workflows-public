@@ -1,0 +1,94 @@
+# This example workflow demonstrates how to specify task defaults
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  # These values are applied to each and every task in the workflow.
+  # Default values can be overridden in individual tasks.
+  task-defaults:
+    # Timeout between tasks (successful or not) in seconds
+    timeout: 6
+    retry:
+      count: 1
+      # Delay between retries in seconds
+      delay: 5
+
+  tasks:
+    retry_this_job:
+      action: civis.scripts.python3
+      # No need to insert the block defined above
+      input:
+        # This code looks at the current workflow & execution
+        # to find out if it's running for the first time.
+        # If it is, it fails. The second time it'll successfully complete.
+        source: |
+          import os
+          import civis
+
+          client = civis.APIClient()
+          resp = client.workflows.get_executions(
+            <% $.get('__env').workflow_id %>,
+            <% $.get('__env').execution_id %>,
+          )
+
+          if len(resp.tasks[0].runs) <= 1:
+            raise ValueError('This job always fails the first time')
+
+          print('It worked this time!')
+
+    retry_this_job_override:
+      action: civis.scripts.python3
+      # We can override a default value
+      timeout: 10
+      input:
+        # This code looks at the current workflow & execution
+        # to find out if it's running for the first time.
+        # If it is, it fails. The second time it'll successfully complete.
+        source: |
+          import os
+          import civis
+
+          client = civis.APIClient()
+          resp = client.workflows.get_executions(
+            <% $.get('__env').workflow_id %>,
+            <% $.get('__env').execution_id %>,
+          )
+
+          if len(resp.tasks[0].runs) <= 1:
+            raise ValueError('This job always fails the first time')
+
+          print('It worked this time!')
+
+    retry_this_job_override_block:
+      action: civis.scripts.python3
+      # If you override a block of values, you need to
+      # populate values for everything underneath it.
+      retry:
+        count: 1
+        delay: 30
+      input:
+        # This code looks at the current workflow & execution
+        # to find out if it's running for the first time.
+        # If it is, it fails. The second time it'll successfully complete.
+        source: |
+          import os
+          import civis
+
+          client = civis.APIClient()
+          resp = client.workflows.get_executions(
+            <% $.get('__env').workflow_id %>,
+            <% $.get('__env').execution_id %>,
+          )
+
+          if len(resp.tasks[0].runs) <= 1:
+            raise ValueError('This job always fails the first time')
+
+          print('It worked this time!')

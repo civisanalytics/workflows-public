@@ -1,0 +1,58 @@
+# This example workflow demonstrates how to define & reference a block of variables
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  # Find out your Database credential id in the credential page in platform
+  # https://platform.civisanalytics.com/credentials
+  credential_id: &credential_id 0
+  # The remote_host_id of your database
+  # https://api.civisanalytics.com/databases
+  cluster_id: &cluster_id 0
+
+  # Define a block with variables
+  # We can reference variables within other variable blocks
+  default_sql: &default_sql
+    remote_host_id: *cluster_id
+    credential_id: *credential_id
+
+  default_task_sql: &default_task_sql
+    action: civis.scripts.sql
+    # Blocks can have items that are other blocks
+    input:
+      remote_host_id: *cluster_id
+      credential_id: *credential_id
+      sql: |
+        SELECT 1
+
+  tasks:
+    sql_job_1:
+      action: civis.scripts.sql
+      input:
+        # Use << to reference the block with credential & host ids
+        <<: *default_sql
+        sql: |
+          SELECT 1
+
+    # This is identical to sql_job_1
+    sql_job_2:
+      <<: *default_task_sql
+
+    sql_job_3:
+      <<: *default_task_sql
+      # if we want to override something under input
+      # we need to re-include all the other items under input
+      # Otherwise, they'll be omitted and the job will fail.
+      input:
+        remote_host_id: *cluster_id
+        credential_id: *credential_id
+        sql: |
+          SELECT 3
