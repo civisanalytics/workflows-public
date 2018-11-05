@@ -24,4 +24,4 @@ workflow:
       with-items: thing in <% $.things %>
       input:
         source: |
-          print(<% $.thing%>)
+          print(<% $.thing %>)
