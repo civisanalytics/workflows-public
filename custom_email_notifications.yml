@@ -19,11 +19,11 @@ workflow:
         notifications:
           successOn: true
           successEmailAddresses:
-            - mkeane@civisanalytics.com
+            - putyourownemail@address.here
           successEmailBody: |
             This is a custom success message using *MarkDown*
           failureEmailAddresses:
-            - mkeane@civisanalytics.com
+            - putyourownemail@address.here
           failureOn: true
         source: |
           print('Hello world!')
@@ -34,7 +34,7 @@ workflow:
         notifications:
           failureOn: true
           failureEmailAddresses:
-            - mkeane@civisanalytics.com
+            - putyourownemail@address.here
         source: |
           raise ValueError('This job always fails!')
 
@@ -44,12 +44,12 @@ workflow:
         notifications:
           successOn: true
           successEmailAddresses:
-            - mkeane@civisanalytics.com
+            - putyourownemail@address.here
           successEmailBody: |
             You'll never see this email
           failureOn: true
           failureEmailAddresses:
-            - mkeane@civisanalytics.com
+            - putyourownemail@address.here
           # After X minutes, email a warning that this job is still running
           # Stall warnings are sent to the failure email addresses
           stallWarningMinutes: 1
