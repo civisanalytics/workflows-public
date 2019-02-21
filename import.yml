@@ -1,0 +1,48 @@
+# This example workflow demonstrates how to create a database sync task.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'
+workflow:
+  databases:
+    dest_remote_host_id: &dest_remote_host_id 99
+    dest_credential_id: &dest_credential_id 9999
+    source_remote_host_id: &source_remote_host_id 99
+    source_credential_id: &source_credential_id 9999
+
+  tasks:
+    import_demo:
+      action: civis.import
+      input:
+        sync_type: Dbsync
+        is_outbound: false
+        source:
+          credential_id: *source_credential_id
+          remote_host_id: *source_remote_host_id
+        destination:
+          credential_id: *dest_credential_id
+          remote_host_id: *dest_remote_host_id
+        syncs:
+          # This is an array of syncs, even if there's just one.
+          - source:
+              database_table:
+                schema: 'public'
+                table: 'test'
+            destination:
+              database_table:
+                schema: 'scratch'
+                table: 'test_demo'
+
+            # A full list of advanced options can be found in the API documentation
+            # https://platform.civisanalytics.com/spa/#/api
+            # under POST /imports/{id}/syncs
+            # Use snake_case for all options
+            advanced_options:
+              wipe_destination_table: true
