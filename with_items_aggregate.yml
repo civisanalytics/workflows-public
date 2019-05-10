@@ -1,0 +1,31 @@
+version: '2.0'
+workflow:
+  tasks:
+    task_1:
+      action: civis.scripts.python3
+      with-items: item in <% range(3) %>
+      input:
+        source: |
+          import civis
+          import json
+          import os
+          client = civis.APIClient()
+          json_val = client.json_values.post(
+              json.dumps({ 'go_on': <% $.item %> > 1 }),
+              name='result'
+              )
+          client.scripts.post_python3_runs_outputs(
+              os.environ['CIVIS_JOB_ID'],
+              os.environ['CIVIS_RUN_ID'],
+              'JSONValue',
+              json_val.id
+              )
+      publish:
+        tables_changed: <% task(task_1).result.select($.outputs).flatten().select($.value).select($.go_on) %>
+      on-success:
+        - task_2: <% $.go_on.where($).any() %>
+    task_2:
+      action: civis.scripts.python3
+      input:
+        source: |
+          print('<% $.go_on %>')
