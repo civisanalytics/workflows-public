@@ -21,7 +21,7 @@ workflow:
               json_val.id
               )
       publish:
-        tables_changed: <% task(task_1).result.select($.outputs).flatten().select($.value).select($.go_on) %>
+        go_on: <% task(task_1).result.select($.outputs).flatten().select($.value).select($.go_on) %>
       on-success:
         - task_2: <% $.go_on.where($).any() %>
     task_2:
