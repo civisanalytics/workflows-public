@@ -1,3 +1,7 @@
+# This workflow demonstrates how to combine the results of multiple with-items 
+# tasks to determine whether to run a follow-on task. In this example, the
+# value of $.go_on will be [False, False, True], .any() will evaluate to 
+# True, and task_2 will run.
 version: '2.0'
 workflow:
   tasks:
