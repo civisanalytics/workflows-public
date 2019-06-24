@@ -1,0 +1,48 @@
+# This example workflow demonstrates how to create a parameterized Google Sheets Export job.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0' # you always need this key to specify version 2 of the mistral DSL
+
+google_export_workflow: # the name of the workflow can be anything, but Platform ignores it
+
+  input: # any items you add here will show up as parameters
+    - species: "versicolor,virginica,setosa" # specify default values
+    
+  tasks:
+    export_to_google:
+      action: civis.import
+      with-items: 'class in <% $.species.split(",") %>' 
+      input:
+        name: 'Export Irises [<% $.class %>]'
+        sync_type: GdocExport
+        is_outbound: true
+        destination:
+          remote_host_id: 219
+          credential_id: 5252
+        source:
+          remote_host_id: 32
+          credential_id: 3826
+        syncs:
+          - advanced_options:
+              export_action: updatewksht
+              sql_query: >-
+                select * 
+                from pcooman.iris
+                where class = 'Iris-<% $.class %>'
+            destination:
+              google_worksheet:
+                spreadsheet: Workflow Demo -- Export to Google Sheet
+                worksheet: <% $.class %>
+            source:
+              path: >-
+                select *
+                from pcooman.iris
+                where class = 'Iris-<% $.class %>'
