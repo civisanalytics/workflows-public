@@ -1,4 +1,6 @@
 # This example workflow demonstrates how to create a parameterized Google Sheets Export job.
+# The required API input parameters for the export job can be found here: https://civis-python.readthedocs.io/en/stable/api_resources.html#civis.resources._resources.Imports.post
+# and here: https://civis-python.readthedocs.io/en/stable/api_resources.html#civis.resources._resources.Imports.post_syncs
 #
 # Workflows in the Civis Platform are written in YAML and a workflow DSL
 # (domain specific language) called Mistral.
@@ -11,7 +13,7 @@
 
 version: '2.0' # you always need this key to specify version 2 of the mistral DSL
 
-google_export_workflow: # the name of the workflow can be anything, but Platform ignores it
+workflow: # this must be called 'workflow' otherwise Platform won't list 'input' as parameters 
 
   input: # any items you add here will show up as parameters
     - species: "versicolor,virginica,setosa" # specify default values
@@ -19,6 +21,8 @@ google_export_workflow: # the name of the workflow can be anything, but Platform
   tasks:
     export_to_google:
       action: civis.import
+      # run the export once for each element in `species`
+      # exporting each output to a different sheet
       with-items: 'class in <% $.species.split(",") %>' 
       input:
         name: 'Export Irises [<% $.class %>]'
