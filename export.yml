@@ -46,7 +46,3 @@ workflow: # this must be called 'workflow' otherwise Platform won't list 'input'
                 spreadsheet: Workflow Demo -- Export to Google Sheet
                 worksheet: <% $.class %>
             source:
-              path: >-
-                select *
-                from pcooman.iris
-                where class = 'Iris-<% $.class %>'
