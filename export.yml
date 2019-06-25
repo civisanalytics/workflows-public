@@ -30,10 +30,10 @@ workflow: # this must be called 'workflow' otherwise Platform won't list 'input'
         is_outbound: true
         destination:
           remote_host_id: 219
-          credential_id: 5252
+          credential_id: 0
         source:
           remote_host_id: 32
-          credential_id: 3826
+          credential_id: 0
         syncs:
           - advanced_options:
               export_action: updatewksht
