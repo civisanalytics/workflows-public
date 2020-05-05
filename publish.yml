@@ -1,0 +1,77 @@
+# This workflow shows how to use the publish and publish-on-error attributes of a task.
+# If the task succeeds, any variables declared in the publish block can be accessed by all downstream tasks.
+# If the task fails, any variables declared in the publish-on-error block can be accessed by all downstream tasks.
+# In this example, the following variables are published by task_1 and task_2:
+#   - job_id
+#   - run_id
+#   - job_name
+#   - started_at
+#   - finished_at
+#   - status
+# These variables are then accessed by the task labeled log_task.
+
+# Note: The use of the anchor (&) is not required to use the publish attribute.
+# It's used here to keep the code D.R.Y. That is, instead of declaring the same variables
+# again in the publish-on-error block, we dereference the variables using an asterisk (*).
+
+version: '2.0'
+workflow:
+  tasks:
+    task_1:
+      description: Some description of task 1
+      action: civis.scripts.python3
+      input:
+        source: |
+          import time
+
+          time.sleep(5)
+          print('Task 1')
+          time.sleep(5)
+      publish: &pub_task1
+        job_name: task_1
+        job_id: <% task(task_1).result.job_id %>
+        run_id: <% task(task_1).result.run_id %>
+        started_at: <% task(task_1).result.started_at %>
+        finished_at: <% task(task_1).result.finished_at %>
+        status: <% task(task_1).result.state %>
+      publish-on-error: *pub_task1
+      on-error:
+        - log_task
+      on-success:
+        - log_task
+        - task_2
+    task_2:
+      description: Some description of task 2
+      action: civis.scripts.python3
+      input:
+        source: |
+          import time
+
+          time.sleep(5)
+          print('Task 2')
+          time.sleep(5)
+      publish: &pub_task2
+        job_name: task_2
+        job_id: <% task(task_2).result.job_id %>
+        run_id: <% task(task_2).result.run_id %>
+        started_at: <% task(task_2).result.started_at %>
+        finished_at: <% task(task_2).result.finished_at %>
+        status: <% task(task_2).result.state %>
+      publish-on-error: *pub_task2
+      on-error:
+        - log_task
+      on-success:
+        - log_task
+    log_task:
+      description: Log task status
+      action: civis.scripts.python3
+      input:
+        source: |
+          print(
+            'Job Name: <% $.job_name %>\n'
+            'Job Id: <% $.job_id %>\n'
+            'Job Run Id: <% $.run_id %>\n'
+            'Started at: <% $.started_at %>\n'
+            'Finished at: <% $.finished_at %>\n'
+            'Status: <% $.status %>'
+          )
