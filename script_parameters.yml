@@ -35,27 +35,30 @@ workflow:
     sql_script:
       action: civis.scripts.sql
       input:
-        remote_host_id: 0
-        credential_id: 0
-        params:
+        # SQL scripts always require the IDs of the remote host and the credential
+        # you are using to connect to it.
+        remote_host_id: 0  # check https://api.civisanalytics.com/databases
+        credential_id: 0   # check https://platform.civisanalytics.com/credentials
+        params:  # This is not an exhaustive list of param types - see the script parameter reference for more
           - name: my_boolean
             type: bool
-            default: true
           - name: my_integer
             type: integer
-            default: 1234
           - name: my_float
             type: float
-            default: 0.1234
           - name: my_string
             type: string
-            default: this is a string
           - name: my_custom_credential
             type: credential_custom
         arguments:
-          my_custom_credential: 0
+          my_boolean: true
+          my_integer: 1234
+          my_float: 0.1234
+          my_string: this is a string
+          my_custom_credential: 0  # ID of the credential
         sql: |
           SELECT 1;
+          -- Variables enclosed in double curly brackets will be replaced with the parameter values.
           -- my_boolean: {{my_boolean}}
           -- my_integer: {{my_integer}}
           -- my_float: {{my_float}}
@@ -63,15 +66,20 @@ workflow:
           -- my_custom_credential: {{my_custom_credential.username}} {{my_custom_credential.password}}
       on-success:
         - container_script
+
     container_script:
       action: civis.scripts.container
       input:
         docker_image_name: civisanalytics/datascience-python
+        docker_image_tag: latest
         required_resources:
           cpu: 256
           memory: 512
           disk_space: 1
         params:
+          # Optionally, you can specify the parameter values in the `params` list
+          # instead of in the `arguments` hash, by using the `default` key.  But
+          # this does not work for credential parameters.
           - name: my_boolean
             type: bool
             default: true
@@ -86,7 +94,7 @@ workflow:
             default: this is a string
           - name: my_file
             type: file
-            default: 0
+            default: 0  # ID of the file
           - name: my_custom_credential
             type: credential_custom
           - name: my_aws_credential
@@ -94,20 +102,24 @@ workflow:
           - name: my_db_credential
             type: credential_redshift
         arguments:
-          my_custom_credential: 0
+          my_custom_credential: 0  # ID of the credential
           my_aws_credential: 0
           my_db_credential: 0
         docker_command: |
+          # Parameter values are added to your container as environment variables.
+          # See the script params reference for a full list.
           echo "my_boolean = $MY_BOOLEAN"
           echo "my_integer = $MY_INTEGER"
           echo "my_float = $MY_FLOAT"
           echo "my_string = $MY_STRING_SHELL_ESCAPED"
           echo "my_file is at $MY_FILE_URL"
-          # echo "my_custom_credential has username $MY_CUSTOM_CREDENTIAL_USERNAME, password $MY_CUSTOM_CREDENTIAL_PASSWORD"
-          # echo "my_aws_credential has access key id $MY_AWS_CREDENTIAL_ACCESS_KEY_ID, secret key $MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY"
-          # echo "my_db_credential has username $MY_DB_CREDENTIAL_USERNAME, password $MY_DB_CREDENTIAL_PASSWORD"
+          # It is generally not advisable to log your credentials.
+          # my_custom_credential generates $MY_CUSTOM_CREDENTIAL_USERNAME, $MY_CUSTOM_CREDENTIAL_PASSWORD
+          # my_aws_credential generates $MY_AWS_CREDENTIAL_ACCESS_KEY_ID, $MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY
+          # my_db_credential generates $MY_DB_CREDENTIAL_USERNAME, $MY_DB_CREDENTIAL_PASSWORD
       on-success:
         - python_script
+
     python_script:
       action: civis.scripts.python3
       input:
@@ -116,6 +128,9 @@ workflow:
           memory: 512
           disk_space: 1
         params:
+          # Optionally, you can specify the parameter values in the `params` list
+          # instead of in the `arguments` hash, by using the `default` key.  But
+          # this does not work for credential parameters.
           - name: my_boolean
             type: bool
             default: true
@@ -130,7 +145,7 @@ workflow:
             default: this is a string
           - name: my_file
             type: file
-            default: 0
+            default: 0  # ID of the file
           - name: my_custom_credential
             type: credential_custom
           - name: my_aws_credential
@@ -138,12 +153,16 @@ workflow:
           - name: my_db_credential
             type: credential_redshift
         arguments:
-          my_custom_credential: 0
+          my_custom_credential: 0  # ID of the credential
           my_aws_credential: 0
           my_db_credential: 0
         source: |
+          # Parameter values are added to your container as environment variables.
+          # See the script params reference for a full list.
+
           import os
 
+          # Type conversions are necessary.  Unfortunately, `bool()` does not work here.
           my_boolean = os.environ['MY_BOOLEAN'] == 'true'
           my_integer = int(os.environ['MY_INTEGER'])
           my_float = float(os.environ['MY_FLOAT'])
@@ -156,6 +175,7 @@ workflow:
           my_db_credential = (os.environ['MY_DB_CREDENTIAL_USERNAME'], os.environ['MY_DB_CREDENTIAL_PASSWORD'])
       on-success:
         - r_script
+
     r_script:
       action: civis.scripts.r
       input:
@@ -166,19 +186,14 @@ workflow:
         params:
           - name: my_boolean
             type: bool
-            default: true
           - name: my_integer
             type: integer
-            default: 1234
           - name: my_float
             type: float
-            default: 0.1234
           - name: my_string
             type: string
-            default: this is a string
           - name: my_file
             type: file
-            default: 0
           - name: my_custom_credential
             type: credential_custom
           - name: my_aws_credential
@@ -186,10 +201,18 @@ workflow:
           - name: my_db_credential
             type: credential_redshift
         arguments:
-          my_custom_credential: 0
+          my_boolean: true
+          my_integer: 1234
+          my_float: 0.1234
+          my_string: this is a string
+          my_file: 0               # ID of the file
+          my_custom_credential: 0  # ID of the credential
           my_aws_credential: 0
           my_db_credential: 0
         source: |
+          # Parameter values are added to your container as environment variables.
+          # See the script params reference for a full list.
+
           my_boolean <- as.logical(Sys.getenv('MY_BOOLEAN'))
           my_integer <- as.numeric(Sys.getenv('MY_INTEGER'))
           my_float <- as.numeric(Sys.getenv('MY_FLOAT'))
@@ -203,9 +226,14 @@ workflow:
           my_db_credential_password <- Sys.getenv('MY_DB_CREDENTIAL_PASSWORD')
       on-success:
         - custom_script
+
     custom_script:
       action: civis.scripts.custom
       input:
-        from_template_id: 0
+        # Custom scripts are built off of templates, which already define the
+        # `params` list, so all you need to provide is the `arguments` hash.
+        # For this example we'll pretend that the template has a string parameter
+        # called `my_string`.
+        from_template_id: 0  # ID of the template backing your custom script
         arguments:
-          branch_namme: blah
+          my_string: this is a string
