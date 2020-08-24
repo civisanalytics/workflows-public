@@ -1,13 +1,33 @@
-# This example workflow demonstrates how to pass parameters into different types of scripts.
+# This example workflow demonstrates how to pass parameters into different types
+# of scripts:
+#   1) SQL script
+#   2) Container script
+#   3) Python script
+#   4) R script
+#   5) Custom script
 #
-# Workflows in the Civis Platform are written in YAML and a workflow DSL
-# (domain specific language) called Mistral.
+# It generally involves adding a `params` list and an `arguments` hash to the
+# task inputs.  The `params` list defines the names and types of the parameters
+# that the script can take.  The `arguments` hash contains the values for those
+# parameters.  Think of it like a form, where `params` defines the checkboxes
+# and input fields on the form, and `arguments` is filling the form out.
 #
-# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
-# for an introduction to YAML.
+# Currently, it is not possible to pass parameters from a workflow into an
+# existing script job (using the `civis.run_job` action).
 #
-# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
-# for a description of the Mistral DSL.
+# Inside your script, parameter values are made available via templating (for
+# SQL scripts) or via environment variables (for Container, Python, and R
+# scripts).  See https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
+# for a reference of all the available parameter types and the variables made
+# available to your script.  If you are passing in string parameters from users
+# or untrusted sources, we advise using escaped versions of the variables to
+# prevent injection attacks.
+#
+# Links:
+# * Workflows documentation: https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics
+# * Script parameter reference: https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
+# * Mistral domain specific language reference: https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html
+# * YAML syntax: https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
 
 version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
 workflow:
