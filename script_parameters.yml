@@ -13,15 +13,16 @@
 # and input fields on the form, and `arguments` is filling the form out.
 #
 # Currently, it is not possible to pass parameters from a workflow into an
-# existing script job (using the `civis.run_job` action).
+# existing script job (using the `civis.run_job` action).  Passing parameters
+# into a script will create a new job for each execution of the workflow.
 #
 # Inside your script, parameter values are made available via templating (for
 # SQL scripts) or via environment variables (for Container, Python, and R
 # scripts).  See https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
-# for a reference of all the available parameter types and the variables made
-# available to your script.  If you are passing in string parameters from users
-# or untrusted sources, we advise using escaped versions of the variables to
-# prevent injection attacks.
+# for a reference containing all the available parameter types, and what
+# variables are made available to your script.  If you are passing in string
+# parameters from user input or other untrusted sources, we advise using escaped
+# versions of the variables to prevent injection attacks.
 #
 # Links:
 # * Workflows documentation: https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics
@@ -37,8 +38,8 @@ workflow:
       input:
         # SQL scripts always require the IDs of the remote host and the credential
         # you are using to connect to it.
-        remote_host_id: 0  # check https://api.civisanalytics.com/databases
-        credential_id: 0   # check https://platform.civisanalytics.com/credentials
+        remote_host_id: 0  # get it from https://api.civisanalytics.com/databases
+        credential_id: 0   # get it from https://platform.civisanalytics.com/credentials
         params:  # This is not an exhaustive list of param types - see the script parameter reference for more
           - name: my_boolean
             type: bool
@@ -58,11 +59,16 @@ workflow:
           my_custom_credential: 0  # ID of the credential
         sql: |
           SELECT 1;
+
           -- Variables enclosed in double curly brackets will be replaced with the parameter values.
           -- my_boolean: {{my_boolean}}
           -- my_integer: {{my_integer}}
           -- my_float: {{my_float}}
-          -- my_string: {{my_string.literal}}
+
+          -- To prevent SQL injection attacks, you can get escaped versions of string parameters.
+          -- {{my_string.literal}} wraps the string in single quotes, changing single quotes in the string to double quotes.
+          -- {{my_string.identifier}} is in a format that is safe to be used as a Redshift identifier.
+
           -- my_custom_credential: {{my_custom_credential.username}} {{my_custom_credential.password}}
       on-success:
         - container_script
@@ -111,6 +117,7 @@ workflow:
           echo "my_boolean = $MY_BOOLEAN"
           echo "my_integer = $MY_INTEGER"
           echo "my_float = $MY_FLOAT"
+          # To prevent command injection attacks, you can get shell-escaped versions of string parameters.
           echo "my_string = $MY_STRING_SHELL_ESCAPED"
           echo "my_file is at $MY_FILE_URL"
           # It is generally not advisable to log your credentials.
@@ -213,11 +220,14 @@ workflow:
           # Parameter values are added to your container as environment variables.
           # See the script params reference for a full list.
 
+          # Type conversion are necessary.
           my_boolean <- as.logical(Sys.getenv('MY_BOOLEAN'))
           my_integer <- as.numeric(Sys.getenv('MY_INTEGER'))
           my_float <- as.numeric(Sys.getenv('MY_FLOAT'))
+
           my_string <- Sys.getenv('MY_STRING')
           my_file_url <- Sys.getenv('MY_FILE_URL')
+
           my_custom_credential_username <- Sys.getenv('MY_CUSTOM_CREDENTIAL_USERNAME')
           my_custom_credential_password <- Sys.getenv('MY_CUSTOM_CREDENTIAL_PASSWORD')
           my_aws_credential_access_key_id <- Sys.getenv('MY_AWS_CREDENTIAL_ACCESS_KEY_ID')
