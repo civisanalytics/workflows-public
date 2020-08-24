@@ -220,7 +220,7 @@ workflow:
           # Parameter values are added to your container as environment variables.
           # See the script params reference for a full list.
 
-          # Type conversion are necessary.
+          # Type conversions are necessary.
           my_boolean <- as.logical(Sys.getenv('MY_BOOLEAN'))
           my_integer <- as.numeric(Sys.getenv('MY_INTEGER'))
           my_float <- as.numeric(Sys.getenv('MY_FLOAT'))
