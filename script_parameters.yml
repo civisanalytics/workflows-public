@@ -1,0 +1,191 @@
+# This example workflow demonstrates how to pass parameters into different types of scripts.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/pike/user/dsl_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  tasks:
+    sql_script:
+      action: civis.scripts.sql
+      input:
+        remote_host_id: 0
+        credential_id: 0
+        params:
+          - name: my_boolean
+            type: bool
+            default: true
+          - name: my_integer
+            type: integer
+            default: 1234
+          - name: my_float
+            type: float
+            default: 0.1234
+          - name: my_string
+            type: string
+            default: this is a string
+          - name: my_custom_credential
+            type: credential_custom
+        arguments:
+          my_custom_credential: 0
+        sql: |
+          SELECT 1;
+          -- my_boolean: {{my_boolean}}
+          -- my_integer: {{my_integer}}
+          -- my_float: {{my_float}}
+          -- my_string: {{my_string.literal}}
+          -- my_custom_credential: {{my_custom_credential.username}} {{my_custom_credential.password}}
+      on-success:
+        - container_script
+    container_script:
+      action: civis.scripts.container
+      input:
+        docker_image_name: civisanalytics/datascience-python
+        required_resources:
+          cpu: 256
+          memory: 512
+          disk_space: 1
+        params:
+          - name: my_boolean
+            type: bool
+            default: true
+          - name: my_integer
+            type: integer
+            default: 1234
+          - name: my_float
+            type: float
+            default: 0.1234
+          - name: my_string
+            type: string
+            default: this is a string
+          - name: my_file
+            type: file
+            default: 0
+          - name: my_custom_credential
+            type: credential_custom
+          - name: my_aws_credential
+            type: credential_aws
+          - name: my_db_credential
+            type: credential_redshift
+        arguments:
+          my_custom_credential: 0
+          my_aws_credential: 0
+          my_db_credential: 0
+        docker_command: |
+          echo "my_boolean = $MY_BOOLEAN"
+          echo "my_integer = $MY_INTEGER"
+          echo "my_float = $MY_FLOAT"
+          echo "my_string = $MY_STRING_SHELL_ESCAPED"
+          echo "my_file is at $MY_FILE_URL"
+          # echo "my_custom_credential has username $MY_CUSTOM_CREDENTIAL_USERNAME, password $MY_CUSTOM_CREDENTIAL_PASSWORD"
+          # echo "my_aws_credential has access key id $MY_AWS_CREDENTIAL_ACCESS_KEY_ID, secret key $MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY"
+          # echo "my_db_credential has username $MY_DB_CREDENTIAL_USERNAME, password $MY_DB_CREDENTIAL_PASSWORD"
+      on-success:
+        - python_script
+    python_script:
+      action: civis.scripts.python3
+      input:
+        required_resources:
+          cpu: 256
+          memory: 512
+          disk_space: 1
+        params:
+          - name: my_boolean
+            type: bool
+            default: true
+          - name: my_integer
+            type: integer
+            default: 1234
+          - name: my_float
+            type: float
+            default: 0.1234
+          - name: my_string
+            type: string
+            default: this is a string
+          - name: my_file
+            type: file
+            default: 0
+          - name: my_custom_credential
+            type: credential_custom
+          - name: my_aws_credential
+            type: credential_aws
+          - name: my_db_credential
+            type: credential_redshift
+        arguments:
+          my_custom_credential: 0
+          my_aws_credential: 0
+          my_db_credential: 0
+        source: |
+          import os
+
+          my_boolean = os.environ['MY_BOOLEAN'] == 'true'
+          my_integer = int(os.environ['MY_INTEGER'])
+          my_float = float(os.environ['MY_FLOAT'])
+
+          my_string = os.environ['MY_STRING']
+          my_file_url = os.environ['MY_FILE_URL']
+
+          my_custom_credential = (os.environ['MY_CUSTOM_CREDENTIAL_USERNAME'], os.environ['MY_CUSTOM_CREDENTIAL_PASSWORD'])
+          my_aws_credential = (os.environ['MY_AWS_CREDENTIAL_ACCESS_KEY_ID'], os.environ['MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY'])
+          my_db_credential = (os.environ['MY_DB_CREDENTIAL_USERNAME'], os.environ['MY_DB_CREDENTIAL_PASSWORD'])
+      on-success:
+        - r_script
+    r_script:
+      action: civis.scripts.r
+      input:
+        required_resources:
+          cpu: 256
+          memory: 512
+          disk_space: 1
+        params:
+          - name: my_boolean
+            type: bool
+            default: true
+          - name: my_integer
+            type: integer
+            default: 1234
+          - name: my_float
+            type: float
+            default: 0.1234
+          - name: my_string
+            type: string
+            default: this is a string
+          - name: my_file
+            type: file
+            default: 0
+          - name: my_custom_credential
+            type: credential_custom
+          - name: my_aws_credential
+            type: credential_aws
+          - name: my_db_credential
+            type: credential_redshift
+        arguments:
+          my_custom_credential: 0
+          my_aws_credential: 0
+          my_db_credential: 0
+        source: |
+          my_boolean <- as.logical(Sys.getenv('MY_BOOLEAN'))
+          my_integer <- as.numeric(Sys.getenv('MY_INTEGER'))
+          my_float <- as.numeric(Sys.getenv('MY_FLOAT'))
+          my_string <- Sys.getenv('MY_STRING')
+          my_file_url <- Sys.getenv('MY_FILE_URL')
+          my_custom_credential_username <- Sys.getenv('MY_CUSTOM_CREDENTIAL_USERNAME')
+          my_custom_credential_password <- Sys.getenv('MY_CUSTOM_CREDENTIAL_PASSWORD')
+          my_aws_credential_access_key_id <- Sys.getenv('MY_AWS_CREDENTIAL_ACCESS_KEY_ID')
+          my_aws_credential_secret_access_key <- Sys.getenv('MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY')
+          my_db_credential_username <- Sys.getenv('MY_DB_CREDENTIAL_USERNAME')
+          my_db_credential_password <- Sys.getenv('MY_DB_CREDENTIAL_PASSWORD')
+      on-success:
+        - custom_script
+    custom_script:
+      action: civis.scripts.custom
+      input:
+        from_template_id: 0
+        arguments:
+          branch_namme: blah
