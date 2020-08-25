@@ -124,6 +124,9 @@ workflow:
           # my_custom_credential generates $MY_CUSTOM_CREDENTIAL_USERNAME, $MY_CUSTOM_CREDENTIAL_PASSWORD
           # my_aws_credential generates $MY_AWS_CREDENTIAL_ACCESS_KEY_ID, $MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY
           # my_db_credential generates $MY_DB_CREDENTIAL_USERNAME, $MY_DB_CREDENTIAL_PASSWORD
+        # You can add this if you want to prevent the created script from
+        # appearing on the scripts index page, to reduce clutter.
+        hidden: true
       on-success:
         - python_script
 
