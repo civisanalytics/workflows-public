@@ -41,8 +41,6 @@ workflow:
         remote_host_id: 0  # get it from https://api.civisanalytics.com/databases
         credential_id: 0   # get it from https://platform.civisanalytics.com/credentials
         params:  # This is not an exhaustive list of param types - see the script parameter reference for more
-          - name: my_boolean
-            type: bool
           - name: my_integer
             type: integer
           - name: my_float
@@ -52,7 +50,6 @@ workflow:
           - name: my_custom_credential
             type: credential_custom
         arguments:
-          my_boolean: true
           my_integer: 1234
           my_float: 0.1234
           my_string: this is a string
@@ -61,7 +58,6 @@ workflow:
           SELECT 1;
 
           -- Variables enclosed in double curly brackets will be replaced with the parameter values.
-          -- my_boolean: {{my_boolean}}
           -- my_integer: {{my_integer}}
           -- my_float: {{my_float}}
 
@@ -86,9 +82,6 @@ workflow:
           # Optionally, you can specify the parameter values in the `params` list
           # instead of in the `arguments` hash, by using the `default` key.  But
           # this does not work for credential parameters.
-          - name: my_boolean
-            type: bool
-            default: true
           - name: my_integer
             type: integer
             default: 1234
@@ -114,7 +107,6 @@ workflow:
         docker_command: |
           # Parameter values are added to your container as environment variables.
           # See the script params reference for a full list.
-          echo "my_boolean = $MY_BOOLEAN"
           echo "my_integer = $MY_INTEGER"
           echo "my_float = $MY_FLOAT"
           # To prevent command injection attacks, you can get shell-escaped versions of string parameters.
@@ -141,9 +133,6 @@ workflow:
           # Optionally, you can specify the parameter values in the `params` list
           # instead of in the `arguments` hash, by using the `default` key.  But
           # this does not work for credential parameters.
-          - name: my_boolean
-            type: bool
-            default: true
           - name: my_integer
             type: integer
             default: 1234
@@ -172,8 +161,8 @@ workflow:
 
           import os
 
-          # Type conversions are necessary.  Unfortunately, `bool()` does not work here.
-          my_boolean = os.environ['MY_BOOLEAN'] == 'true'
+          # Environment variables are retrieved as strings, so if you want to use
+          # them as numbers, you'll need to do type conversion.
           my_integer = int(os.environ['MY_INTEGER'])
           my_float = float(os.environ['MY_FLOAT'])
 
@@ -194,8 +183,6 @@ workflow:
           memory: 512
           disk_space: 1
         params:
-          - name: my_boolean
-            type: bool
           - name: my_integer
             type: integer
           - name: my_float
@@ -211,7 +198,6 @@ workflow:
           - name: my_db_credential
             type: credential_redshift
         arguments:
-          my_boolean: true
           my_integer: 1234
           my_float: 0.1234
           my_string: this is a string
@@ -223,8 +209,8 @@ workflow:
           # Parameter values are added to your container as environment variables.
           # See the script params reference for a full list.
 
-          # Type conversions are necessary.
-          my_boolean <- as.logical(Sys.getenv('MY_BOOLEAN'))
+          # Environment variables are retrieved as strings, so if you want to use
+          # them as numbers, you'll need to do type conversion.
           my_integer <- as.numeric(Sys.getenv('MY_INTEGER'))
           my_float <- as.numeric(Sys.getenv('MY_FLOAT'))
 
