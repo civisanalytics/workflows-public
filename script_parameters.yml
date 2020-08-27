@@ -18,15 +18,15 @@
 #
 # Inside your script, parameter values are made available via templating (for
 # SQL scripts) or via environment variables (for Container, Python, and R
-# scripts).  See https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
-# for a reference containing all the available parameter types, and what
-# variables are made available to your script.  If you are passing in string
-# parameters from user input or other untrusted sources, we advise using escaped
-# versions of the variables to prevent injection attacks.
+# scripts).  See the Script parameter reference linked below for a reference
+# containing all the available parameter types, and what variables are made
+# available to your script.  If you are passing in string parameters from user
+# input or other untrusted sources, we advise using escaped versions of the
+# variables to prevent injection attacks.
 #
 # Links:
-# * Workflows documentation: https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics
-# * Script parameter reference: https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
+# * Workflows documentation (requires Platform login): https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics
+# * Script parameter reference (requires Platform login): https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
 # * Mistral domain specific language reference: https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html
 # * YAML syntax: https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
 

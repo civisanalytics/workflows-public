@@ -27,7 +27,7 @@ The optimal order to read through them is
 You can find documentation for the technologies behind the Civis workflows in
 the following spots:
 
-- [Civis Workflows documentation](https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics)
+- [Civis Workflows documentation](https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics) (requires Platform login)
 - [Mistral v2 Workflow DSL](https://docs.openstack.org/mistral/train/user/wf_lang_v2.html)
 - [YAML](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html)
 - [YAQL](https://yaql.readthedocs.io/en/latest/)
