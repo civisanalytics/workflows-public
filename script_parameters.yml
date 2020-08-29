@@ -66,6 +66,10 @@ workflow:
           -- {{my_string.identifier}} is in a format that is safe to be used as a Redshift identifier.
 
           -- my_custom_credential: {{my_custom_credential.username}} {{my_custom_credential.password}}
+
+          -- So, for example, you could use these variables in your SQL statements like
+          --   SELECT * FROM {{schema_name.identifier}}.{{table_name.identifier}}
+          --     WHERE {{column_name.identifier}} > {{threshold}};
       on-success:
         - container_script
 
