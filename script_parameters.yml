@@ -106,7 +106,7 @@ workflow:
             type: credential_redshift
         arguments:
           my_custom_credential: 0  # ID of the credential
-          my_aws_credential: 0
+          my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
           my_db_credential: 0
         docker_command: |
           # Parameter values are added to your container as environment variables.
@@ -157,7 +157,7 @@ workflow:
             type: credential_redshift
         arguments:
           my_custom_credential: 0  # ID of the credential
-          my_aws_credential: 0
+          my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
           my_db_credential: 0
         source: |
           # Parameter values are added to your container as environment variables.
@@ -207,7 +207,7 @@ workflow:
           my_string: this is a string
           my_file: 0               # ID of the file
           my_custom_credential: 0  # ID of the credential
-          my_aws_credential: 0
+          my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
           my_db_credential: 0
         source: |
           # Parameter values are added to your container as environment variables.
