@@ -71,7 +71,7 @@ workflow:
           --   SELECT * FROM {{schema_name.identifier}}.{{table_name.identifier}}
           --     WHERE {{column_name.identifier}} > {{threshold}};
       on-success:
-        - container_script
+        - my_versatile_container_script
 
     my_versatile_container_script:
       action: civis.scripts.container
@@ -124,7 +124,7 @@ workflow:
         # appearing on the scripts index page, to reduce clutter.
         hidden: true
       on-success:
-        - python_script
+        - the_coolest_python_script
 
     the_coolest_python_script:
       action: civis.scripts.python3
@@ -177,7 +177,7 @@ workflow:
           my_aws_credential = (os.environ['MY_AWS_CREDENTIAL_ACCESS_KEY_ID'], os.environ['MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY'])
           my_db_credential = (os.environ['MY_DB_CREDENTIAL_USERNAME'], os.environ['MY_DB_CREDENTIAL_PASSWORD'])
       on-success:
-        - r_script
+        - r_script_full_of_arrows
 
     r_script_full_of_arrows:
       action: civis.scripts.r
@@ -228,7 +228,7 @@ workflow:
           my_db_credential_username <- Sys.getenv('MY_DB_CREDENTIAL_USERNAME')
           my_db_credential_password <- Sys.getenv('MY_DB_CREDENTIAL_PASSWORD')
       on-success:
-        - custom_script
+        - my_convenient_custom_script
 
     my_convenient_custom_script:
       action: civis.scripts.custom
