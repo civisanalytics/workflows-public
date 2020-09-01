@@ -1,0 +1,242 @@
+# This example workflow demonstrates how to pass parameters into different types
+# of scripts:
+#   1) SQL script
+#   2) Container script
+#   3) Python script
+#   4) R script
+#   5) Custom script
+#
+# It generally involves adding a `params` list and an `arguments` hash to the
+# task inputs.  The `params` list defines the names and types of the parameters
+# that the script can take.  The `arguments` hash contains the values for those
+# parameters.  Think of it like a form, where `params` defines the checkboxes
+# and input fields on the form, and `arguments` is filling the form out.
+#
+# Currently, it is not possible to pass parameters from a workflow into an
+# existing script job (using the `civis.run_job` action).  Passing parameters
+# into a script will create a new job for each execution of the workflow.
+#
+# Inside your script, parameter values are made available via templating (for
+# SQL scripts) or via environment variables (for Container, Python, and R
+# scripts).  See the Script parameter reference linked below for a reference
+# containing all the available parameter types, and what variables are made
+# available to your script.  If you are passing in string parameters from user
+# input or other untrusted sources, we advise using escaped versions of the
+# variables to prevent injection attacks.
+#
+# Links:
+# * Workflows documentation (requires Platform login): https://civis.zendesk.com/hc/en-us/articles/115004172983-Workflows-Basics
+# * Script parameter reference (requires Platform login): https://civis.zendesk.com/hc/en-us/articles/360001579592-Configuring-Scripts-via-the-Civis-API
+# * Mistral domain specific language reference: https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html
+# * YAML syntax: https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  tasks:
+    my_awesome_sql_script:
+      action: civis.scripts.sql
+      input:
+        # SQL scripts always require the IDs of the remote host and the credential
+        # you are using to connect to it.
+        remote_host_id: 0  # get it from https://api.civisanalytics.com/databases
+        credential_id: 0   # get it from https://platform.civisanalytics.com/credentials
+        params:  # This is not an exhaustive list of param types - see the script parameter reference for more
+          - name: my_integer
+            type: integer
+          - name: my_float
+            type: float
+          - name: my_string
+            type: string
+          - name: my_custom_credential
+            type: credential_custom
+        arguments:
+          my_integer: 1234
+          my_float: 0.1234
+          my_string: this is a string
+          my_custom_credential: 0  # ID of the credential
+        sql: |
+          SELECT 1;
+
+          -- Variables enclosed in double curly brackets will be replaced with the parameter values.
+          -- my_integer: {{my_integer}}
+          -- my_float: {{my_float}}
+
+          -- To prevent SQL injection attacks, you can get escaped versions of string parameters.
+          -- {{my_string.literal}} wraps the string in single quotes, changing single quotes in the string to double quotes.
+          -- {{my_string.identifier}} is in a format that is safe to be used as a Redshift identifier.
+
+          -- my_custom_credential: {{my_custom_credential.username}} {{my_custom_credential.password}}
+
+          -- So, for example, you could use these variables in your SQL statements like
+          --   SELECT * FROM {{schema_name.identifier}}.{{table_name.identifier}}
+          --     WHERE {{column_name.identifier}} > {{threshold}};
+      on-success:
+        - my_versatile_container_script
+
+    my_versatile_container_script:
+      action: civis.scripts.container
+      input:
+        docker_image_name: civisanalytics/datascience-python
+        docker_image_tag: latest
+        required_resources:
+          cpu: 256
+          memory: 512
+          disk_space: 1
+        params:
+          # Optionally, you can specify the parameter values in the `params` list
+          # instead of in the `arguments` hash, by using the `default` key.  But
+          # this does not work for credential parameters.
+          - name: my_integer
+            type: integer
+            default: 1234
+          - name: my_float
+            type: float
+            default: 0.1234
+          - name: my_string
+            type: string
+            default: this is a string
+          - name: my_file
+            type: file
+            default: 0  # ID of the file
+          - name: my_custom_credential
+            type: credential_custom
+          - name: my_aws_credential
+            type: credential_aws
+          - name: my_db_credential
+            type: credential_redshift
+        arguments:
+          my_custom_credential: 0  # ID of the credential
+          my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
+          my_db_credential: 0
+        docker_command: |
+          # Parameter values are added to your container as environment variables.
+          # See the script params reference for a full list.
+          echo "my_integer = $MY_INTEGER"
+          echo "my_float = $MY_FLOAT"
+          # To prevent command injection attacks, you can get shell-escaped versions of string parameters.
+          echo "my_string = $MY_STRING_SHELL_ESCAPED"
+          echo "my_file is at $MY_FILE_URL"
+          # It is generally not advisable to log your credentials.
+          # my_custom_credential generates $MY_CUSTOM_CREDENTIAL_USERNAME, $MY_CUSTOM_CREDENTIAL_PASSWORD
+          # my_aws_credential generates $MY_AWS_CREDENTIAL_ACCESS_KEY_ID, $MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY
+          # my_db_credential generates $MY_DB_CREDENTIAL_USERNAME, $MY_DB_CREDENTIAL_PASSWORD
+        # You can add this if you want to prevent the created script from
+        # appearing on the scripts index page, to reduce clutter.
+        hidden: true
+      on-success:
+        - the_coolest_python_script
+
+    the_coolest_python_script:
+      action: civis.scripts.python3
+      input:
+        required_resources:
+          cpu: 256
+          memory: 512
+          disk_space: 1
+        params:
+          # Optionally, you can specify the parameter values in the `params` list
+          # instead of in the `arguments` hash, by using the `default` key.  But
+          # this does not work for credential parameters.
+          - name: my_integer
+            type: integer
+            default: 1234
+          - name: my_float
+            type: float
+            default: 0.1234
+          - name: my_string
+            type: string
+            default: this is a string
+          - name: my_file
+            type: file
+            default: 0  # ID of the file
+          - name: my_custom_credential
+            type: credential_custom
+          - name: my_aws_credential
+            type: credential_aws
+          - name: my_db_credential
+            type: credential_redshift
+        arguments:
+          my_custom_credential: 0  # ID of the credential
+          my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
+          my_db_credential: 0
+        source: |
+          # Parameter values are added to your container as environment variables.
+          # See the script params reference for a full list.
+
+          import os
+
+          # Environment variables are retrieved as strings, so if you want to use
+          # them as numbers, you'll need to do type conversion.
+          my_integer = int(os.environ['MY_INTEGER'])
+          my_float = float(os.environ['MY_FLOAT'])
+
+          my_string = os.environ['MY_STRING']
+          my_file_url = os.environ['MY_FILE_URL']
+
+          my_custom_credential = (os.environ['MY_CUSTOM_CREDENTIAL_USERNAME'], os.environ['MY_CUSTOM_CREDENTIAL_PASSWORD'])
+          my_aws_credential = (os.environ['MY_AWS_CREDENTIAL_ACCESS_KEY_ID'], os.environ['MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY'])
+          my_db_credential = (os.environ['MY_DB_CREDENTIAL_USERNAME'], os.environ['MY_DB_CREDENTIAL_PASSWORD'])
+      on-success:
+        - r_script_full_of_arrows
+
+    r_script_full_of_arrows:
+      action: civis.scripts.r
+      input:
+        required_resources:
+          cpu: 256
+          memory: 512
+          disk_space: 1
+        params:
+          - name: my_integer
+            type: integer
+          - name: my_float
+            type: float
+          - name: my_string
+            type: string
+          - name: my_file
+            type: file
+          - name: my_custom_credential
+            type: credential_custom
+          - name: my_aws_credential
+            type: credential_aws
+          - name: my_db_credential
+            type: credential_redshift
+        arguments:
+          my_integer: 1234
+          my_float: 0.1234
+          my_string: this is a string
+          my_file: 0               # ID of the file
+          my_custom_credential: 0  # ID of the credential
+          my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
+          my_db_credential: 0
+        source: |
+          # Parameter values are added to your container as environment variables.
+          # See the script params reference for a full list.
+
+          # Environment variables are retrieved as strings, so if you want to use
+          # them as numbers, you'll need to do type conversion.
+          my_integer <- as.numeric(Sys.getenv('MY_INTEGER'))
+          my_float <- as.numeric(Sys.getenv('MY_FLOAT'))
+
+          my_string <- Sys.getenv('MY_STRING')
+          my_file_url <- Sys.getenv('MY_FILE_URL')
+
+          my_custom_credential_username <- Sys.getenv('MY_CUSTOM_CREDENTIAL_USERNAME')
+          my_custom_credential_password <- Sys.getenv('MY_CUSTOM_CREDENTIAL_PASSWORD')
+          my_aws_credential_access_key_id <- Sys.getenv('MY_AWS_CREDENTIAL_ACCESS_KEY_ID')
+          my_aws_credential_secret_access_key <- Sys.getenv('MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY')
+          my_db_credential_username <- Sys.getenv('MY_DB_CREDENTIAL_USERNAME')
+          my_db_credential_password <- Sys.getenv('MY_DB_CREDENTIAL_PASSWORD')
+      on-success:
+        - my_convenient_custom_script
+
+    my_convenient_custom_script:
+      action: civis.scripts.custom
+      input:
+        # Custom scripts are built off of templates, which already define the
+        # `params` list, so all you need to provide is the `arguments` hash.
+        # For this example we'll pretend that the template has a string parameter
+        # called `my_string`.
+        from_template_id: 0  # ID of the template backing your custom script
+        arguments:
+          my_string: this is a string
