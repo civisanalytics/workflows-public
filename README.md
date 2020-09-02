@@ -18,9 +18,10 @@ The optimal order to read through them is
 9. `custom_email_notifications.yml`
 10. `with_items.yml`
 11. `with_items_dict.yml`
-12. `automatic_task_retry.yml`
-13. `task_defaults.yml`
-14. `export.yml`
+12. `with_items_aggregate.yml`
+13. `automatic_task_retry.yml`
+14. `task_defaults.yml`
+15. `export.yml`
 
 ## Further Documentation
 
