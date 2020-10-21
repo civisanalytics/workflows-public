@@ -29,11 +29,11 @@ workflow: # this must be called 'workflow' otherwise Platform won't list 'input'
         sync_type: GdocExport
         is_outbound: true
         destination:
-          remote_host_id: 219
-          credential_id: 0
+          remote_host_id: 219 # this is the Google remote host singleton; don't replace
+          credential_id: 0 # replace with your Google credential id
         source:
-          remote_host_id: 32
-          credential_id: 0
+          remote_host_id: 32 # replace with your source database id
+          credential_id: 0 # replace with your credential id on the source database
         syncs:
           - advanced_options:
               export_action: updatewksht
