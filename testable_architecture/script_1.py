@@ -1,17 +1,21 @@
 import os
 import pandas as pd
+import civis
 
 
-def main(input_data_reference, intermediary_data_reference):
+def main(input_filepath, intermediary_tbname, db_name):
     """
-    Transform input data and output to intermediary location.
+    Transform input data and output to intermediary table.
 
     Parameters:
     ------------
-    input_data_reference: str
+    input_filepath: str
         Filepath of a csv containing input data.
-    intermediary_data_reference: str
-        Filepath where a csv containing intermediary data
+    intermediary_tbname: str
+        schema.tablename where intermediary data
+        will be written.
+    db_name: str
+        Name of the database on which `intermediary_tbname`
         will be written.
 
     Returns:
@@ -20,18 +24,23 @@ def main(input_data_reference, intermediary_data_reference):
 
     """
 
-    print(f'Reading input file {input_data_reference}.')
-    input_df = pd.read_csv(input_data_reference)
+    input_df = pd.read_csv(input_filepath)
+    print(f"Read input file {input_filepath}:\n{input_df}")
 
     intermediary_df = input_df * 2
-    print(f'Intermediary data:\n{intermediary_df}')
+    print(f"Intermediary data:\n{intermediary_df}")
 
-    intermediary_df.to_csv(intermediary_data_reference, index=False)
-    print(f'Wrote intermediary file {intermediary_data_reference}.')
+    civis.io.dataframe_to_civis(
+        df=intermediary_df, database=db_name, existing_table_rows="drop"
+    )
+    print(
+        f"Wrote intermediary data to table {intermediary_tbname} on database {db_name}."
+    )
 
 
 if __name__ == "__main__":
     main(
-        input_data_reference=os.environ["INPUT_DATA_REFERENCE"],
-        intermediary_data_reference=os.environ["INTERMEDIARY_DATA_REFERENCE"],
+        input_filepath=os.environ["INPUT_FILEPATH"],
+        intermediary_tbname=os.environ["INTERMEDIARY_TBNAME"],
+        db_name=os.environ["DB_NAME"],
     )
