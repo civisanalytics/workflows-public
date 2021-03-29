@@ -1,0 +1,67 @@
+version: '2.0'
+
+workflow:
+  description: Demonstrate testable pipeline architecture.
+
+  input:
+  - pipeline_version:  # git version tag
+  - input_filepath: 'testable_architecture/production_data.csv'
+  - intermediary_tbname: 'scratch.intermediary'
+  - output_tbname: 'scratch.output'
+  - db_name: 'redshift-general'
+
+
+  config:
+    container_input: &container_input
+      repo_http_uri: https://github.com/civisanalytics/workflows-public.git
+      repo_ref: <% $.pipeline_version %>
+      docker_image_name: 'civisanalytics/datascience-python'
+      docker_image_tag: &docker_image_tag '6.3.1'
+      required_resources:
+        cpu: 256
+        memory: 1000
+        diskSpace: 1
+
+
+  tasks:
+    Task_1:
+      description: Execute step 1 transformations
+      on-success:
+        - Task_2
+      action: civis.scripts.container
+      input:
+        <<: *container_input
+        params:
+        - name: INPUT_FILEPATH
+          type: string
+        - name: INTERMEDIARY_TBNAME
+          type: string
+        - name: DB_NAME
+          type: string
+        arguments:
+          INPUT_FILEPATH: <% $.input_filepath %>
+          INTERMEDIARY_TBNAME: <% $.intermediary_tbname %>
+          DB_NAME: <% $.db_name %>
+        docker_command: |-
+          cd app;
+          python testable_architecture/script_1.py
+
+    Task_2:
+      description: Execute step 2 transformations
+      action: civis.scripts.container
+      input:
+        <<: *container_input
+        params:
+        - name: INTERMEDIARY_TBNAME
+          type: string
+        - name: OUTPUT_TBNAME
+          type: string
+        - name: DB_NAME
+          type: string
+        arguments:
+          INTERMEDIARY_TBNAME: <% $.intermediary_tbname %>
+          OUTPUT_TBNAME: <% $.output_tbname %>
+          DB_NAME: <% $.db_name %>
+        docker_command: |-
+          cd app;
+          python testable_architecture/script_2.py
