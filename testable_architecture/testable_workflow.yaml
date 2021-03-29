@@ -7,6 +7,7 @@ workflow:
   - pipeline_version:  # git version tag
   - input_filepath:
   - output_tbname:
+  - db_name: redshift-general
 
   intermediary_tbname: &intermediary_tbname 'scratch.intermediary'
 
@@ -35,6 +36,8 @@ workflow:
           type: string
         - name: INTERMEDIARY_TBNAME
           type: string
+        - name: DB_NAME
+          type: string
         arguments:
           INPUT_FILEPATH: <% $.input_filepath %>
           INTERMEDIARY_TBNAME: *intermediary_tbname
@@ -51,6 +54,8 @@ workflow:
         - name: INTERMEDIARY_TBNAME
           type: string
         - name: OUTPUT_TBNAME
+          type: string
+        - name: DB_NAME
           type: string
         arguments:
           INTERMEDIARY_TBNAME: *intermediary_tbname
