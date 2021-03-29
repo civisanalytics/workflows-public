@@ -41,7 +41,7 @@ def main(intermediary_tbname, output_tbname, db_name):
 
 if __name__ == "__main__":
     main(
-        intermediary_tbname=os.environ["INTERMEDIARY_DATA_REFERENCE"],
-        output_tbname=os.environ["OUTPUT_DATA_REFERENCE"],
+        intermediary_tbname=os.environ["INTERMEDIARY_TBNAME"],
+        output_tbname=os.environ["OUTPUT_TBNAME"],
         db_name=os.environ["DB_NAME"],
     )
