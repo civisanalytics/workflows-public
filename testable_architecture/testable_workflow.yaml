@@ -5,11 +5,11 @@ workflow:
 
   input:
   - pipeline_version:  # git version tag
-  - input_filepath:
-  - tbname_suffix: prod
+  - input_filepath: 'testable_architecture/production_data.csv'
+  - intermediary_tbname: 'scratch.intermediary'
+  - output_tbname: 'scratch.output'
   - db_name: redshift-general
 
-  intermediary_tbname: &intermediary_tbname scratch.intermediary_<% $.tbname_suffix >
 
   config:
     container_input: &container_input
@@ -40,7 +40,7 @@ workflow:
           type: string
         arguments:
           INPUT_FILEPATH: <% $.input_filepath %>
-          INTERMEDIARY_TBNAME: *intermediary_tbname
+          INTERMEDIARY_TBNAME: <% $.intermediary_tbname %>
           DB_NAME: <% $.db_name %>
         docker_command: |-
           cd app;
@@ -59,8 +59,8 @@ workflow:
         - name: DB_NAME
           type: string
         arguments:
-          INTERMEDIARY_TBNAME: *intermediary_tbname
-          OUTPUT_TBNAME: scratch.output_<% $.tbname_suffix %>
+          INTERMEDIARY_TBNAME: <% $.intermediary_tbname %>
+          OUTPUT_TBNAME: <% $.output_tbname %>
           DB_NAME: <% $.db_name %>
         docker_command: |-
           cd app;
