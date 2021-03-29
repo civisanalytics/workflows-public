@@ -24,17 +24,16 @@ def main(intermediary_tbname, output_tbname, db_name):
 
     """
 
-    intermediary_df = pd.read_csv(intermediary_tbname)
+    intermediary_df = civis.io.read_civis(
+        table=intermediary_tbname, database=db_name, use_pandas=True
+    )
     print(f"Read intermediary table {intermediary_tbname}:\n{intermediary_df}")
 
     output_df = intermediary_df * 10
     print(f"Output data:\n{output_df}")
 
     civis.io.dataframe_to_civis(
-        df=output_df,
-        table=output_tbname,
-        database=db_name,
-        existing_table_rows="drop",
+        df=output_df, table=output_tbname, database=db_name, existing_table_rows="drop",
     )
     print(f"Wrote output data to table {output_tbname} on database {db_name}.")
 
