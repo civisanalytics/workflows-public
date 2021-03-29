@@ -60,7 +60,7 @@ workflow:
           type: string
         arguments:
           INTERMEDIARY_TBNAME: *intermediary_tbname
-          OUTPUT_TBNAME: <% $.output_data_reference %>
+          OUTPUT_TBNAME: <% $.output_tbname %>
           DB_NAME: <% $.db_name %>
         docker_command: |-
           cd app;
