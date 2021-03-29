@@ -28,6 +28,7 @@ def main(input_filepath, intermediary_tbname, db_name):
     print(f"Read input file {input_filepath}:\n{input_df}")
 
     intermediary_df = input_df * 2
+    intermediary_df = intermediary_df.transpose()
     print(f"Intermediary data:\n{intermediary_df}")
 
     civis.io.dataframe_to_civis(
