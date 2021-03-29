@@ -31,7 +31,10 @@ def main(input_filepath, intermediary_tbname, db_name):
     print(f"Intermediary data:\n{intermediary_df}")
 
     civis.io.dataframe_to_civis(
-        df=intermediary_df, database=db_name, existing_table_rows="drop"
+        df=intermediary_df,
+        table=intermediary_tbname,
+        database=db_name,
+        existing_table_rows="drop",
     )
     print(
         f"Wrote intermediary data to table {intermediary_tbname} on database {db_name}."

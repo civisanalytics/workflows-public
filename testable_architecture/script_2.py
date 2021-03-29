@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import civis
 
 
 def main(intermediary_tbname, output_tbname, db_name):
@@ -29,7 +30,12 @@ def main(intermediary_tbname, output_tbname, db_name):
     output_df = intermediary_df * 10
     print(f"Output data:\n{output_df}")
 
-    output_df.to_csv(output_tbname, index=False)
+    civis.io.dataframe_to_civis(
+        df=output_df,
+        table=output_tbname,
+        database=db_name,
+        existing_table_rows="drop",
+    )
     print(f"Wrote output data to table {output_tbname} on database {db_name}.")
 
 
