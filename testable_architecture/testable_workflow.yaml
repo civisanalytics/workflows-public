@@ -41,6 +41,7 @@ workflow:
         arguments:
           INPUT_FILEPATH: <% $.input_filepath %>
           INTERMEDIARY_TBNAME: *intermediary_tbname
+          DB_NAME: <% $.db_name %>
         docker_command: |-
           cd app;
           python testable_architecture/script_1.py
@@ -60,6 +61,7 @@ workflow:
         arguments:
           INTERMEDIARY_TBNAME: *intermediary_tbname
           OUTPUT_TBNAME: <% $.output_data_reference %>
+          DB_NAME: <% $.db_name %>
         docker_command: |-
           cd app;
           python testable_architecture/script_2.py
