@@ -24,6 +24,7 @@ def main(input_data_reference, intermediary_data_reference):
     input_df = pd.read_csv(input_data_reference)
 
     intermediary_df = input_df * 2
+    print(f'Intermediary data:\n{intermediary_df}')
 
     intermediary_df.to_csv(intermediary_data_reference, index=False)
     print(f'Wrote intermediary file {intermediary_data_reference}.')

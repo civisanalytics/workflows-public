@@ -24,6 +24,7 @@ def main(intermediary_data_reference, output_data_reference):
     intermediary_df = pd.read_csv(intermediary_data_reference)
 
     output_df = intermediary_df * 10
+    print(f'Output data:\n{output_df}')
 
     output_df.to_csv(output_data_reference, index=False)
     print(f'Wrote output file {output_data_reference}.')
