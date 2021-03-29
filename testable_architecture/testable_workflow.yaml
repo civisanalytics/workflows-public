@@ -9,7 +9,7 @@ workflow:
   - tbname_suffix: prod
   - db_name: redshift-general
 
-  intermediary_tbname: &intermediary_tbname 'scratch.intermediary_<% $.tbname_suffix >'
+  intermediary_tbname: &intermediary_tbname scratch.intermediary_<% $.tbname_suffix >
 
   config:
     container_input: &container_input
@@ -60,7 +60,7 @@ workflow:
           type: string
         arguments:
           INTERMEDIARY_TBNAME: *intermediary_tbname
-          OUTPUT_TBNAME: 'scratch.output_<% $.tbname_suffix %>'
+          OUTPUT_TBNAME: scratch.output_<% $.tbname_suffix %>
           DB_NAME: <% $.db_name %>
         docker_command: |-
           cd app;
