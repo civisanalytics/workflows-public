@@ -8,7 +8,7 @@ workflow:
   - input_filepath: 'testable_architecture/production_data.csv'
   - intermediary_tbname: 'scratch.intermediary'
   - output_tbname: 'scratch.output'
-  - db_name: redshift-general
+  - db_name: 'redshift-general'
 
 
   config:
