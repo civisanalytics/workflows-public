@@ -1,0 +1,58 @@
+# This example workflow demonstrates how to create a parameterized database sync (dbsync).
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/train/user/wf_lang_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'
+workflow:
+  # A database ID for the source or destination table(s) to be synced
+  database_remote_host_id: &database_remote_host_id 1
+  # Database credentials -- this can be found in your Platform Credentials page.
+  database_credential_id: &database_credential_id 2
+  input:
+    - ac_schema: 'scratch'
+
+  tasks:
+    dbsync_test:
+      action: civis.import
+      input:
+        name: DB Sync Test
+        sync_type: Dbsync
+        # Required
+        is_outbound: false
+        source:
+          credentialID: *database_credential_id
+          remoteHostId: *database_remote_host_id
+        destination:
+          credentialID: *database_credential_id
+          remoteHostId: *database_remote_host_id
+        # List of tables to be transferred
+        syncs:
+        - source:
+            databaseTable:
+              schema: <% $.ac_schema %>
+              table: "dbsync_source1"
+          destination:
+            databaseTable:
+              schema: <% $.ac_schema %>
+              table: "dbsync_destination1"
+          advanced_options:
+            # For a full list of advanced options, you can call a imports.get() on a specific db sync object
+            verifyTableRowCounts: true
+
+        - source:
+            databaseTable:
+              schema: <% $.ac_schema %>
+              table: "dbsync_source2"
+          destination:
+            databaseTable:
+              schema: <% $.ac_schema %>
+              table: "dbsync_destination2"
+          advanced_options:
+            verifyTableRowCounts: true
