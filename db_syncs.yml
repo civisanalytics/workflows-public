@@ -1,0 +1,48 @@
+version: "2.0"
+workflow:
+  input:
+    - database_credential_id: 11722  # Your database credential (can be found in Platform Credentials)
+    
+    ### Source database parameters
+    - source_remote_host_id: 89  # The source database ID
+    - source_schema: "scratch"  # The schema where source tables live
+    - source_tables: "source_table_1,source_table_2"  # A comma-separated list of table names in `source_schema`
+    
+    ### Destination database parameters
+    - destination_remote_host_id: 32  # The destination database ID
+    - destination_schema: "scratch"  # The schema where destination tables live
+    - destination_tables: "destination_table_1,destination_table_2"  # A comma-separated list of table names in `destination_schema`
+
+    ### NOTE: table names in `destination_tables` correspond element-wise to table names in `source_tables`
+    ### e.g. "source_table_1" is synced to "destination_table_1"
+    
+  tasks:
+    dbsync_test:
+      with-items: table_name in <% $.source_tables.split(",").zip($.destination_tables.split(",")) %>
+      action: civis.import
+      input:
+        name: DB Sync Test
+        sync_type: Dbsync
+        
+        # Required
+        is_outbound: false
+        source:
+          credentialID: <% $.database_credential_id %>
+          remoteHostId: <% $.source_remote_host_id %>
+        destination:
+          credentialID: <% $.database_credential_id %>
+          remoteHostId: <% $.destination_remote_host_id %>
+          
+        # List of tables to be transferred
+        syncs:
+        - source:
+            databaseTable:
+              schema: <% $.source_schema %>
+              table: <% $.table_name[0] %>
+          destination:
+            databaseTable:
+              schema: <% $.destination_schema %>
+              table: <% $.table_name[1] %>
+          advanced_options:
+            # For a full list of advanced options, you can call a imports.get() on a specific db sync object
+            verifyTableRowCounts: true
