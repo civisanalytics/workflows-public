@@ -9,6 +9,12 @@
 # non-commercial execution is specified. The table name and processing are
 # different for commercial vs. non-commercial.
 
+# Tricks in this workflow:
+# 1. Using std.noop to publish variables (line 43)
+# 2. Converting a string to a boolean for readability (line 47)
+# 3. Using a dictionary for string replacement (line 50)
+# 4. Using a "capture" task to get externalize job/run IDs (lines 34, 91)
+
 # Workflows in the Civis Platform are written in YAML and a workflow DSL
 # (domain specific language) called Mistral.
 #
