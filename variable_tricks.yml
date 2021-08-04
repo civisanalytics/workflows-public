@@ -1,0 +1,125 @@
+# This example workflow demonstrates some tricks with Mistral variables that
+# might come in handy.
+#
+# This workflow is a collection of the tricks presented in the Workflow Tricks
+# tech chat presentation: https://docs.google.com/presentation/d/151-_f-WfiOTyg0wi4mVJGaD_7apPyR_2Pt3SG0-4YIk
+#
+# Within the fiction of this exercise, the goal of this workflow is to update
+# a table and run some processing based on whether a commercial or
+# non-commercial execution is specified. The table name and processing are
+# different for commercial vs. non-commercial.
+
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/train/user/wf_lang_v2.html,
+# for a description of the Mistral DSL.
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+workflow:
+  input:
+    # Our only input is a true/false value specifying commercial/noncommercial
+    # processing. Since this is assumed to be a workflow parameter, it can
+    # only contain a string value (as Platform can only pass strings).
+    - str_commercial: "true"
+    # Trick 4: Job ID and Run ID are parameters to facilitate partial
+    # executions. By filling in a Job/Run ID from a previous execution of the
+    # common_processing task, the user could run the comm_processing or
+    # noncomm_processing tasks without having to execute the entire workflow.
+    - job_id: 0
+    - run_id: 0
+
+  tasks:
+    publish_vars:
+      # Trick 1: A std.noop action allows us to publish variables without
+      # having to run a script or job
+      action: std.noop
+      publish:
+        # Trick 2: Converting a string to a boolean to make things easier
+        # manage later on
+        is_comm: <% $.str_commercial = "true" %>
+        # Trick 3: Using a dictionary for string replacement
+        table: '<% {"true" => ""}.get($.str_commercial, "non") %>comm_data'
+      on-success:
+        - update_table
+
+    update_table:
+      action: civis.scripts.sql
+      input:
+        credential_id: 0
+        remote_host_id: 0
+        sql: |
+          INSERT INTO <% $.table %> VALUES (...)
+      on-success:
+        - common_processing
+
+    # Let's assume this task creates a file and attaches it as a run output
+    # to the job. We need that run outputs as input to the next step, so
+    # we need to capture the job and run IDs of this task after it runs.
+    common_processing:
+      action: civis.scripts.python3
+      input:
+        source: |
+          import civis
+          import json
+          import os
+          import random
+          client = civis.APIClient()
+          data = random.randint(10000)
+          json_val = client.json_values.post(
+              json.dumps({ 'data':  data }),
+              name='result'
+              )
+          client.scripts.post_python3_runs_outputs(
+              os.environ['CIVIS_JOB_ID'],
+              os.environ['CIVIS_RUN_ID'],
+              'JSONValue',
+              json_val.id
+              )
+      on-success:
+        - common_capture
+
+    # Trick 4: Using a "capture" noop to facilitate partial executions. If
+    # a job/run ID are specified in the parameters, this task will overwrite
+    # them.
+    common_capture:
+      action: std.noop
+      publish:
+        job_id: <% task(common_processing).result.job_id %>
+        run_id: <% task(common_processing).result.run_id %>
+      on-success:
+        - comm_processing: <% $.is_comm %>
+        - noncomm_processing: <% not $.is_comm %>
+
+    comm_processing:
+      action: civis.scripts.python3
+      with-items: item in <% range(3) %>
+      input:
+        source: |
+          import civis
+          import json
+          import os
+          client = civis.APIClient()
+          output = client.jobs.list_runs_outputs(
+              <% $.job_id %>,
+              <% $.run_id %>
+              )[0]['value']
+          print(f"Commercial processing: {output}")
+
+    noncomm_processing:
+      action: civis.scripts.python3
+      with-items: item in <% range(3) %>
+      input:
+        source: |
+          import civis
+          import json
+          import os
+          client = civis.APIClient()
+          output = client.jobs.list_runs_outputs(
+              <% $.job_id %>,
+              <% $.run_id %>
+              )[0]['value']
+          print(f"Noncommercial processing: {output}")
