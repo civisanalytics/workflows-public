@@ -100,8 +100,6 @@ workflow:
       input:
         source: |
           import civis
-          import json
-          import os
           client = civis.APIClient()
           output = client.jobs.list_runs_outputs(
               <% $.job_id %>,
@@ -115,8 +113,6 @@ workflow:
       input:
         source: |
           import civis
-          import json
-          import os
           client = civis.APIClient()
           output = client.jobs.list_runs_outputs(
               <% $.job_id %>,
