@@ -96,7 +96,6 @@ workflow:
 
     comm_processing:
       action: civis.scripts.python3
-      with-items: item in <% range(3) %>
       input:
         source: |
           import civis
@@ -109,7 +108,6 @@ workflow:
 
     noncomm_processing:
       action: civis.scripts.python3
-      with-items: item in <% range(3) %>
       input:
         source: |
           import civis
