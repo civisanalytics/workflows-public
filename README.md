@@ -22,6 +22,7 @@ The optimal order to read through them is
 13. `automatic_task_retry.yml`
 14. `task_defaults.yml`
 15. `export.yml`
+16. `variable_tricks.yml` (Optional)
 
 ## Further Documentation
 
