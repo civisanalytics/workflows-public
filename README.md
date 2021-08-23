@@ -10,19 +10,20 @@ The optimal order to read through them is
 1. `quickstart.yml`
 2. `branching_and_dependencies.yml`
 3. `outputs_and_yaql.yml`
-4. `sql_scripts.yml`
-5. `script_parameters.yml`
-6. `pause.yml`
-7. `yaml_variables.yml`
-8. `variable_blocks.yml`
-9. `custom_email_notifications.yml`
-10. `with_items.yml`
-11. `with_items_dict.yml`
-12. `with_items_aggregate.yml`
-13. `automatic_task_retry.yml`
-14. `task_defaults.yml`
-15. `export.yml`
-16. `variable_tricks.yml` (Optional)
+4. `and_or.yml`
+5. `sql_scripts.yml`
+6. `script_parameters.yml`
+7. `pause.yml`
+8. `yaml_variables.yml`
+9. `variable_blocks.yml`
+10. `custom_email_notifications.yml`
+11. `with_items.yml`
+12. `with_items_dict.yml`
+13. `with_items_aggregate.yml`
+14. `automatic_task_retry.yml`
+15. `task_defaults.yml`
+16. `export.yml`
+17. `variable_tricks.yml` (Optional)
 
 ## Further Documentation
 
