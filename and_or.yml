@@ -1,0 +1,68 @@
+# This example workflow demonstrates how to use the `and` and `or` keywords to
+# emulate the "if-else" functionality in many programming languages.
+#
+# See the YAQL docs for more details on the `and` and `or` operators:
+# https://yaql.readthedocs.io/en/latest/standard_library.html#boolean-logic-functions
+
+
+version: '2.0'  # you always need this key to specify version 2 of the mistral DSL
+
+boolean_and_or:  # the name of the workflow can be anything, but Platform ignores it
+  tasks:
+    make_outputs:
+      action: civis.python3_script
+      input:
+        name: make outputs
+        # The code here creates a Python dict with boolean values and attaches
+        # it to the job as a run output.
+        source: |
+          import civis
+          import os
+          import json
+
+          client = civis.APIClient()
+          json_val = client.json_values.post(
+              json.dumps({ 'should_be_true': True,
+                           'should_be_false': False }),
+              name='result'
+              )
+          client.scripts.post_python3_runs_outputs(
+              os.environ['CIVIS_JOB_ID'],
+              os.environ['CIVIS_RUN_ID'],
+              'JSONValue',
+              json_val.id
+              )
+      publish:
+        # The expression in `<%...%>` is YAQL with some Mistral extensions.
+        #
+        # The syntax `task().result` gets the results of the current task.
+        #
+        # The Civis mistral client attaches run outputs to the `outputs`
+        # attribute of the result.
+        #
+        make_outputs_result: <% task().result.outputs[0].value %>
+      on-success:
+        - query_outputs
+
+    query_outputs:
+      action: civis.python3_script
+      input:
+        name: query_outputs
+        # Now we are using the published task output and YAQL to conditionally
+        # set some variables in Python.
+        #
+        # We use YAQL to query the run outputs. In YAQL, the `$` sign refers to
+        # the specific "row" in the query. `.` is used to access attributes of
+        # the row. YAQL is made to query nested data structures like the JSON
+        # that we attached.
+        #
+        # The output of this job should be:
+        #   should_be_true was set correctly
+        #   should_be_false was set correctly
+        #
+        source: |
+          sbt_msg = '<% $.make_outputs_result.should_be_true and 'set correctly' or 'False!' %>'
+          sbf_msg = '<% $.make_outputs_result.should_be_false and 'True!' or 'set correctly' %>'
+
+          print(f'should_be_true was {sbt_msg}')
+          print(f'should_be_false was {sbf_msg}')
