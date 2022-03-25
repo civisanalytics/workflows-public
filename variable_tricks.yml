@@ -14,6 +14,7 @@
 # 2. Converting a string to a boolean for readability (line 47)
 # 3. Using a dictionary for string replacement (line 50)
 # 4. Using a "capture" task to get externalize job/run IDs (lines 34, 91)
+# 5. Using run outputs and publish to surface variables to the workflow (lines 128-160)
 
 # Workflows in the Civis Platform are written in YAML and a workflow DSL
 # (domain specific language) called Mistral.
@@ -123,3 +124,37 @@ workflow:
               <% $.run_id %>
               )[0]['value']
           print(f"Noncommercial processing: {output}")
+
+    publish_from_python:
+      action: civis.scripts.python3
+      input:
+        source: |
+          import civis
+          import json
+          # Post a value as a run output, kwarg "name" is important
+          json_id = client.json_values.post(
+              json.dumps("Published from python!"), name="passed_var"
+          ).id
+          client.scripts.post_containers_runs_outputs(
+              int(os.environ["CIVIS_JOB_ID"]),
+              int(os.environ["CIVIS_RUN_ID"]),
+              "JSONValue",
+              json_id,
+          )
+      publish:
+        passed_var: "<% task(publish_from_python).result.outputs.where($.name = 'passed_var').first().value
+          %>"
+      on-success:
+        - use_published_var
+
+    use_published_var:
+      action: civis.scripts.python3
+      input:
+        params:
+          - name: "passed_var"
+            type: "string"
+        arguments:
+          passed_var: <% $.passed_var %>
+        source: |
+          import os
+          print("Var passed in: ", os.environ["passed_var"])
