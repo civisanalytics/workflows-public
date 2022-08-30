@@ -19,7 +19,7 @@ outputs_and_yaql:  # the name of the workflow can be anything, but Platform igno
 
   tasks:
     make_outputs:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: make outputs
         # The code here writes some text data to some files and then uses
@@ -51,7 +51,7 @@ outputs_and_yaql:  # the name of the workflow can be anything, but Platform igno
         - find_outputs
 
     find_outputs:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: find_outputs
         # Now we are using the attached task outputs and YAQL to find a specific

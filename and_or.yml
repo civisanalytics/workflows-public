@@ -10,7 +10,7 @@ version: '2.0'  # you always need this key to specify version 2 of the mistral D
 boolean_and_or:  # the name of the workflow can be anything, but Platform ignores it
   tasks:
     make_outputs:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: make outputs
         # The code here creates a Python dict with boolean values and attaches
@@ -45,7 +45,7 @@ boolean_and_or:  # the name of the workflow can be anything, but Platform ignore
         - query_outputs
 
     query_outputs:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: query_outputs
         # Now we are using the published task output and YAQL to conditionally

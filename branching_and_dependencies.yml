@@ -18,7 +18,7 @@ branching_and_dependencies:  # the name of the workflow can be anything, but Pla
   tasks:  # all tasks for the workflow go here
 
     python_init:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python init
         source: print("Hello from Python! We are just getting started!")
@@ -31,7 +31,7 @@ branching_and_dependencies:  # the name of the workflow can be anything, but Pla
         - python_task_c
 
     python_task_a:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python task a
         # some fancy YAML for multiline strings
@@ -45,7 +45,7 @@ branching_and_dependencies:  # the name of the workflow can be anything, but Pla
         - python_final
 
     python_task_b:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python task b
         source: |
@@ -57,7 +57,7 @@ branching_and_dependencies:  # the name of the workflow can be anything, but Pla
         - python_final
 
     python_task_c:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python task c
         source: |
@@ -69,7 +69,7 @@ branching_and_dependencies:  # the name of the workflow can be anything, but Pla
         - python_final
 
     python_final:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python final
         source: print("The final Python script greets you!")

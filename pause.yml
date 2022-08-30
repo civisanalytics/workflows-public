@@ -17,7 +17,7 @@ pause:
   tasks:
 
     python:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python is the best
         source: print("Hello from Python!")
@@ -32,7 +32,7 @@ pause:
         - python_never_run
 
     python_never_run:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python that is never run
         source: print("You will never see this message!")

@@ -15,10 +15,10 @@ version: '2.0'  # you always need this key to specify version 2 of the mistral D
 quickstart:  # the name of the workflow can be anything, but Platform ignores it
   tasks:  # all tasks for the workflow go here
 
-    # Run a python script by specifying a the python3_script action.
+    # Run a python script by specifying a the python3 script action.
     # The inputs are any inputs to the /scripts/python3 API endpoint
     python:
-      action: civis.python3_script
+      action: civis.scripts.python3
       input:
         name: python is the best
         source: print("Hello from Python!")
@@ -30,7 +30,7 @@ quickstart:  # the name of the workflow can be anything, but Platform ignores it
     # This is a task for an R script again with the possible inputs
     # determined by the /scripts/r API endpoint.
     r:
-      action: civis.r_script
+      action: civis.scripts.r
       input:
         name: R is the best
         source: print("Hello from R!")
@@ -42,7 +42,7 @@ quickstart:  # the name of the workflow can be anything, but Platform ignores it
     # Again the possible inputs are determined by the /scripts/scontainers
     # API endpoint.
     container:
-      action: civis.container_script
+      action: civis.scripts.container
       input:
         name: containers forever
         docker_image_name: civisanalytics/datascience-python
