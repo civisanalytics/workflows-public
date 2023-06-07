@@ -155,10 +155,15 @@ workflow:
             type: credential_aws
           - name: my_db_credential
             type: credential_redshift
+          - name: my_database
+            type: database
         arguments:
           my_custom_credential: 0  # ID of the credential
           my_aws_credential: 0     # get it from https://platform.civisanalytics.com/credentials
           my_db_credential: 0
+          my_database:
+            database: 0 # get it from https://api.civisanalytics.com/databases
+            credential: 0 # get it from https://platform.civisanalytics.com/credentials
         source: |
           # Parameter values are added to your container as environment variables.
           # See the script params reference for a full list.
@@ -176,6 +181,9 @@ workflow:
           my_custom_credential = (os.environ['MY_CUSTOM_CREDENTIAL_USERNAME'], os.environ['MY_CUSTOM_CREDENTIAL_PASSWORD'])
           my_aws_credential = (os.environ['MY_AWS_CREDENTIAL_ACCESS_KEY_ID'], os.environ['MY_AWS_CREDENTIAL_SECRET_ACCESS_KEY'])
           my_db_credential = (os.environ['MY_DB_CREDENTIAL_USERNAME'], os.environ['MY_DB_CREDENTIAL_PASSWORD'])
+          
+          my_database_id = os.environ['MY_DATABASE_ID']
+          my_database_credential = (os.environ['MY_DATABASE_CREDENTIAL_USERNAME'], os.environ['MY_DATABASE_CREDENTIAL_PASSWORD'])
       on-success:
         - r_script_full_of_arrows
 
