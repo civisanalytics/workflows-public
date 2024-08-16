@@ -1,0 +1,23 @@
+version: '2.0'
+workflow:
+  tasks:
+    task_1:
+      action: civis.import
+      input:
+        sync_type: Dbsync
+        is_outbound: False
+        source:
+          credential_id: cred1
+          remote_host_id: db1
+        destination:
+          credential_id: cred2
+          remote_host_id: db2
+        syncs:
+        - source:
+            database_table:
+              schema: myschema1
+              table: mytable1
+          destination:
+            database_table:
+              schema: myschema2
+              table: mytable2
