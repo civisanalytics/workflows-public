@@ -1,21 +1,34 @@
+# This example workflow demonstrates how to sync tables from one database to another in a workflow.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/train/user/wf_lang_v2.html,
+# for a description of the Mistral DSL.
+#
+# See the YAQL docs for more details, https://yaql.readthedocs.io/en/latest/.
+
 version: "2.0"
 workflow:
   input:
     - database_credential_id: 11722  # Your database credential (can be found in Platform Credentials)
-    
-    ### Source database parameters
+
+    # Source database parameters
     - source_remote_host_id: 89  # The source database ID
     - source_schema: "scratch"  # The schema where source tables live
     - source_tables: "source_table_1,source_table_2"  # A comma-separated list of table names in `source_schema`
-    
-    ### Destination database parameters
+
+    # Destination database parameters
     - destination_remote_host_id: 32  # The destination database ID
     - destination_schema: "scratch"  # The schema where destination tables live
     - destination_tables: "destination_table_1,destination_table_2"  # A comma-separated list of table names in `destination_schema`
 
-    ### NOTE: table names in `destination_tables` correspond element-wise to table names in `source_tables`
-    ### e.g. "source_table_1" is synced to "destination_table_1"
-    
+    # NOTE: table names in `destination_tables` correspond element-wise to table names in `source_tables`
+    # e.g. "source_table_1" is synced to "destination_table_1"
+
   tasks:
     dbsync_test:
       with-items: table_name in <% $.source_tables.split(",").zip($.destination_tables.split(",")) %>
@@ -23,7 +36,7 @@ workflow:
       input:
         name: DB Sync Test
         sync_type: Dbsync
-        
+
         # Required
         is_outbound: false
         source:
@@ -32,7 +45,7 @@ workflow:
         destination:
           credentialID: <% $.database_credential_id %>
           remoteHostId: <% $.destination_remote_host_id %>
-          
+
         # List of tables to be transferred
         syncs:
         - source:
