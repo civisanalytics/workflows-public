@@ -42,10 +42,10 @@ workflow:
         # Required
         is_outbound: false
         source:
-          credentialID: <% $.database_credential_id %>
+          credentialID: <% $.source_database_credential_id %>
           remoteHostId: <% $.source_remote_host_id %>
         destination:
-          credentialID: <% $.database_credential_id %>
+          credentialID: <% $.destination_database_credential_id %>
           remoteHostId: <% $.destination_remote_host_id %>
 
         # List of tables to be transferred
