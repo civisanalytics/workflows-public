@@ -14,7 +14,9 @@
 version: "2.0"
 workflow:
   input:
-    - database_credential_id: 11722  # Your database credential (can be found in Platform Credentials)
+  # Your database credentials (can be found in Platform Credentials)
+    - source_database_credential_id: 11722  
+    - destination_database_credential_id: 12345
 
     # Source database parameters
     - source_remote_host_id: 89  # The source database ID
