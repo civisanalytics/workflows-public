@@ -1,0 +1,82 @@
+# This example workflow demonstrates how to use task transitions to create conditional task executions.
+# Transition expressions are written in YAQL.
+#
+# Workflows in the Civis Platform are written in YAML and a workflow DSL
+# (domain specific language) called Mistral.
+#
+# See this website, https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html,
+# for an introduction to YAML.
+#
+# See the Mistral documentation, https://docs.openstack.org/mistral/train/user/wf_lang_v2.html,
+# for a description of the Mistral DSL.
+#
+# See the YAQL docs for more details, https://yaql.readthedocs.io/en/latest/.
+
+version: '2.0'
+workflow:
+  input:
+    - table_name:
+    - database_id:
+  tasks:
+    check_table_rows:
+      action: civis.scripts.python3
+      input:
+        source: >
+          import civis
+
+          import json
+
+          import os
+
+
+          def check_table_rows(table, database):
+            sql = f'select count(*) from {table}'
+
+            return civis.io.query_civis(sql, database).result()['result_rows'][0][0]
+
+
+          def post_json_run_output(json_value_dict):
+            client = civis.APIClient()
+            json_value_object = client.json_values.post(
+              json.dumps(json_value_dict),
+              name='table_rows')
+            client.scripts.post_python3_runs_outputs(
+              os.environ['CIVIS_JOB_ID'],
+              os.environ['CIVIS_RUN_ID'],
+              'JSONValue',
+              json_value_object.id)
+
+
+          rows = check_table_rows('<% $.table_name%>', <% $.database_id %>)
+
+
+          json_dict = {'rows': rows}
+
+          post_json_run_output(json_dict)
+
+
+          # Task transitions with YAQL expressions allow a user to apply conditional logic to their workflow.
+          # https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html#transitions-with-expressions
+          # Tasks will only execute if the YAQL expression evaluates to true.
+          # Conditional task transitions can be created using the outputs of your job,
+          #  as long as they are posting outputs as shown above.
+
+          # Other conditions such as time of day,
+          # or calculations using the outputs of multiple tasks can be accomplished as well.
+                   
+      on-success:
+        - conditional_rows_task: <% int(task(check_table_rows).result.outputs[0].value['rows']) > 0 %>        
+        
+        # now() evaluates in UTC
+        # only start a run if the time is between 12 UTC and 24 UTC
+        - conditional_time_task: <%  int(now().format("%H")) > 12  and int(now().format("%H")) < 24   %>
+    conditional_rows_task:
+      action: civis.scripts.python3
+      input:
+        source: |
+          print('This runs only if there are > 0 rows in the table')
+    conditional_time_task:
+      action: civis.scripts.python3
+      input:
+        source: |
+          print('This runs only during certain times of day')
