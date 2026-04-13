@@ -1,0 +1,84 @@
+# This workflow is built to monitor long-running Tableau refresh jobs. It is composed of 3 tasks:
+#
+# 1. Task to kick off the Tableau refresh
+# 2. Task to poll for status of the refresh job, until it reaches a completed state
+# 3. Task to check the final status of the refresh job, and fail or succeed the whole workflow accordingly
+#
+# The existence of the 3rd task is necessary to allow the 2nd task to stop polling whenever a final status is reached,
+# whether that is a success or a failure. If the 2nd task were to error on failure, then the workflow would keep polling
+# unnecessarily until the max amount of retries was met.
+
+version: '2.0'
+workflow:
+  input:
+    - report_id:
+  tasks:
+    start_refresh:
+      action: civis.scripts.python3
+      input:
+        name: Refresh Tableau Report
+        source: |
+          import os
+          import json
+          import civis
+          client = civis.APIClient()
+          # Start the refresh
+          refresh_response = client.reports.post_refresh(<% $.report_id %>)
+          print(json.dumps(refresh_response.json(), indent=4))
+          # Save the tableau refresh job ID as a job output, so it can be accessed from the poll_refresh_status task
+          json_value_obj = client.json_values.post(json.dumps(refresh_response.tableau_refresh_job_id), name="Tableau Refresh Job ID")
+          client.scripts.post_python3_runs_outputs(os.environ['CIVIS_JOB_ID'], os.environ['CIVIS_RUN_ID'], 'JSONValue', json_value_obj.id)
+      on-success:
+        - poll_refresh_status
+    poll_refresh_status:
+      action: civis.scripts.python3
+      retry:
+        # Delay between attempts in seconds.
+        # Customize this to suit the refresh you're checking on.
+        # 600 seconds = 10 minutes
+        delay: 600
+        # Number of attempts, not including the first one.
+        # A count of 6 means there are 7 attempts.
+        # 7 attempts * 10 minutes between attempts = 1 hour of job status polling
+        count: 6
+      input:
+        name: Poll Tableau Refresh Job Status
+        source: |
+          import os
+          import json
+          import time
+          import civis
+          client = civis.APIClient()
+          # Fetch tableau job ID from previous job's outputs. Note that JSON outputs always return a list
+          refresh_job_id = <% task(start_refresh).result.outputs.where($.name = 'Tableau Refresh Job ID').value %>[0]
+          resp = client.reports.get_refresh(<% $.report_id %>, refresh_job_id)
+          if resp.status in ['queued', 'running']:
+            raise RuntimeError(f'Refresh job is {resp.status}')
+          else:
+            if resp.error:
+              status_message = f'Job {resp.job_id} {resp.status}. Error: {resp.error}'
+            else:
+              status_message = f'Job {resp.job_id} {resp.status}'
+            print(status_message)
+            # Save the final status as a job output, so it can be accessed from the check status task
+            status_obj = client.json_values.post(json.dumps(resp.status), name="Final Status")
+            message_obj = client.json_values.post(json.dumps(status_message), name="Status Message")
+            client.scripts.post_python3_runs_outputs(os.environ['CIVIS_JOB_ID'], os.environ['CIVIS_RUN_ID'], 'JSONValue', status_obj.id)
+            client.scripts.post_python3_runs_outputs(os.environ['CIVIS_JOB_ID'], os.environ['CIVIS_RUN_ID'], 'JSONValue', message_obj.id)
+      on-success:
+        - check_final_status
+    check_final_status:
+      action: civis.scripts.python3
+      input:
+        name: Check Tableau Refresh Job Final Status
+        source: |
+          import civis
+          client = civis.APIClient()
+          # Fetch final status & message from previous job's outputs. Note that JSON outputs always return a list
+          final_status = <% task(poll_refresh_status).result.outputs.where($.name = 'Final Status').value %>[0]
+          status_message = <% task(poll_refresh_status).result.outputs.where($.name = 'Status Message').value %>[0]
+          # Raise an error if the job failed, otherwise just print the status message
+          if final_status == 'succeeded':
+              print(f'{status_message}')
+          else:
+            raise RuntimeError(f'{status_message}')
