@@ -46,11 +46,10 @@ workflow:
         source: |
           import os
           import json
-          import time
           import civis
           client = civis.APIClient()
-          # Fetch tableau job ID from previous job's outputs. Note that JSON outputs always return a list
-          refresh_job_id = <% task(start_refresh).result.outputs.where($.name = 'Tableau Refresh Job ID').value %>[0]
+          # Fetch tableau job ID from previous job's outputs
+          refresh_job_id = <% task(start_refresh).result.outputs.where($.name = 'Tableau Refresh Job ID').first().value %>
           resp = client.reports.get_refresh(<% $.report_id %>, refresh_job_id)
           if resp.status in ['queued', 'running']:
             raise RuntimeError(f'Refresh job is {resp.status}')
@@ -74,11 +73,11 @@ workflow:
         source: |
           import civis
           client = civis.APIClient()
-          # Fetch final status & message from previous job's outputs. Note that JSON outputs always return a list
-          final_status = <% task(poll_refresh_status).result.outputs.where($.name = 'Final Status').value %>[0]
-          status_message = <% task(poll_refresh_status).result.outputs.where($.name = 'Status Message').value %>[0]
+          # Fetch final status & message from previous job's outputs
+          final_status = <% task(poll_refresh_status).result.outputs.where($.name = 'Final Status').first().value %>
+          status_message = <% task(poll_refresh_status).result.outputs.where($.name = 'Status Message').first().value %>
           # Raise an error if the job failed, otherwise just print the status message
           if final_status == 'succeeded':
-              print(f'{status_message}')
+            print(status_message)
           else:
             raise RuntimeError(f'{status_message}')
