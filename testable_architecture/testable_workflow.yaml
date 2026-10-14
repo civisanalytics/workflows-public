@@ -16,7 +16,7 @@ workflow:
       repo_http_uri: https://github.com/civisanalytics/workflows-public.git
       repo_ref: <% $.pipeline_version %>
       docker_image_name: 'civisanalytics/datascience-python'
-      docker_image_tag: &docker_image_tag '6.3.1'
+      docker_image_tag: &docker_image_tag '9.1'
       required_resources:
         cpu: 256
         memory: 1000
